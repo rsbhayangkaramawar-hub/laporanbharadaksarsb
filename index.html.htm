@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VVIP Bharadaksa - Realtime Cloud</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // CONFIG FIREBASE ANDA
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6zBIqZLRpQPBq6psw_Z3oGZ_SK_X0rfQ",
+            authDomain: "bhara-daksa.firebaseapp.com",
+            databaseURL: "https://bhara-daksa-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "bhara-daksa",
+            storageBucket: "bhara-daksa.firebasestorage.app",
+            messagingSenderId: "765829225964",
+            appId: "1:765829225964:web:acb32bf51f69bfe766f4c9",
+            measurementId: "G-GCYRJT9SFS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const dbRef = ref(db, 'patients');
+
+        let patients = {};
+        const rooms = [
+            "BHARA DAKSA 01", "BHARA DAKSA 02", "BHARA DAKSA 03", "BHARA DAKSA 04",
+            "BHARA DAKSA 05-A", "BHARA DAKSA 05-B", "BHARA DAKSA 06-A", "BHARA DAKSA 06-B",
+            "BHARA DAKSA 07-A", "BHARA DAKSA 07-B", "BHARA DAKSA 08-A", "BHARA DAKSA 08-B"
+        ];
+        let doctors = ["dr. Budi, Sp.PD", "dr. Andi, Sp.B", "dr. Siti, Sp.A"];
+        let currentRoom = null;
+
+        // Sync Data dari Cloud
+        onValue(dbRef, (snapshot) => {
+            patients = snapshot.val() || {};
+            renderGrid();
+        });
+
+        // Simpan Pasien Baru
+        window.savePatient = (e) => {
+            e.preventDefault();
+            const r = document.getElementById('ruangSelect').value;
+            const newPatient = {
+                nama: document.getElementById('nama').value,
+                umur: document.getElementById('umur').value,
+                diagnosa: document.getElementById('diagnosa').value,
+                penjamin: document.getElementById('penjamin').value,
+                dpjp: document.getElementById('dpjpSelect').value,
+                catatan: "Belum ada catatan perkembangan."
+            };
+            set(ref(db, 'patients/' + r.replace(/\s+/g, '_')), newPatient);
+            document.getElementById('patientForm').reset();
+        };
+
+        // Update Catatan (Gold Text)
+        window.saveNote = () => {
+            const key = currentRoom.replace(/\s+/g, '_');
+            update(ref(db, 'patients/' + key), {
+                catatan: document.getElementById('noteInput').value || "Belum ada catatan perkembangan."
+            });
+            closeModal();
+        };
+
+        // Checkout Pasien (Konfirmasi Ganda)
+        window.checkoutPatient = () => {
+            const key = currentRoom.replace(/\s+/g, '_');
+            if(confirm(`⚠️ Konfirmasi: Pulangkan pasien ${patients[key].nama} dari ${currentRoom}?`)) {
+                remove(ref(db, 'patients/' + key));
+                closeModal();
+            }
+        };
+
+        function renderGrid() {
+            const grid = document.getElementById('patientGrid');
+            const rSelect = document.getElementById('ruangSelect');
+            grid.innerHTML = ''; 
+            rSelect.innerHTML = '<option value="">-- PILIH BED KOSONG --</option>';
+            let count = 0;
+
+            rooms.forEach(room => {
+                const key = room.replace(/\s+/g, '_');
+                const p = patients[key];
+                if (p) {
+                    count++;
+                    grid.innerHTML += `
+                        <div onclick="openModal('${room}')" class="box-bed box-terisi flex flex-col scale-in">
+                            <div class="box-header">${room}</div>
+                            <div class="p-4 flex-1 flex flex-col">
+                                <h4 class="text-base font-black text-white uppercase truncate">${p.nama}</h4>
+                                <p class="text-[11px] text-blue-200 font-bold">${p.umur} Thn</p>
+                                <p class="text-[11px] text-white font-bold italic mt-2">${p.diagnosa || '-'}</p>
+                                <p class="text-[10px] text-cyan-400 font-bold mt-1 uppercase">${p.dpjp || '-'}</p>
+                                <div class="bg-black/40 border-l-2 border-yellow-500 p-2 rounded mt-2 flex-1">
+                                    <p class="text-[11px] text-yellow-500 font-bold whitespace-pre-wrap leading-tight">${p.catatan}</p>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-2 right-2 text-[9px] bg-white/10 px-2 rounded-full font-bold uppercase">${p.penjamin}</div>
+                        </div>`;
+                } else {
+                    rSelect.innerHTML += `<option value="${room}">${room}</option>`;
+                    grid.innerHTML += `
+                        <div class="box-bed flex items-center justify-center opacity-30 border-dashed border-2 border-white/10">
+                            <div class="box-header absolute top-0 w-full">${room}</div>
+                            <p class="text-[10px] font-black uppercase text-gray-500 tracking-widest">Kosong</p>
+                        </div>`;
+                }
+            });
+            document.getElementById('borStat').innerText = `${count} / 12 (${Math.round((count/12)*100)}%)`;
+        }
+
+        window.openModal = (r) => {
+            currentRoom = r;
+            const key = r.replace(/\s+/g, '_');
+            const p = patients[key];
+            document.getElementById('modalTitle').innerText = r;
+            document.getElementById('modalPatientSub').innerText = `${p.nama} (${p.umur} Thn)`;
+            document.getElementById('noteInput').value = p.catatan === "Belum ada catatan perkembangan." ? "" : p.catatan;
+            document.getElementById('modalOverlay').style.display = 'flex';
+        };
+        window.closeModal = () => document.getElementById('modalOverlay').style.display = 'none';
+
+        // Timer Realtime
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('liveClock').innerText = now.toLocaleTimeString('id-ID');
+            document.getElementById('liveDay').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }, 1000);
+
+        // Laporan WhatsApp (List Bed + Detail Kondisi)
+        window.sendWhatsApp = () => {
+            let msg = `*LAPORAN HARIAN VVIP BHARADAKSA*%0A📅 _${document.getElementById('liveDay').innerText}_%0A📊 *BOR:* ${document.getElementById('borStat').innerText}%0A%0A*🏥 STATUS KAPASITAS BED:*%0A`;
+            rooms.forEach((r, i) => {
+                const p = patients[r.replace(/\s+/g, '_')];
+                msg += `${i+1}. ${r}: ${p ? '*TERISI* ('+p.nama+')' : '_KOSONG_' } %0A`;
+            });
+            msg += `%0A*📝 DETAIL KONDISI PASIEN:*%0A%0A`;
+            for(let key in patients) {
+                let p = patients[key];
+                msg += `*${key.replace(/_/g, ' ')}*%0A👤 *Nama:* ${p.nama}%0A🩺 *Diagnosa:* ${p.diagnosa}%0A👨‍⚕️ *DPJP:* ${p.dpjp}%0A📝 *Catatan:* _${p.catatan.replace(/\n/g, '%0A')}_%0A%0A`;
+            }
+            window.open(`https://wa.me/?text=${msg}`, '_blank');
+        };
+
+        const select = document.getElementById('dpjpSelect');
+        doctors.forEach(d => select.innerHTML += `<option>${d}</option>`);
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: white; height: 100vh; overflow: hidden; }
+        .sidebar-section { background-color: #0f172a; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+        .input-dark { background-color: #1e293b; border: 1px solid #334155; color: white; font-size: 0.75rem; }
+        .box-bed { background-color: #0f172a; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; position: relative; min-height: 245px; transition: 0.3s; cursor: pointer; }
+        .box-terisi { background-color: #1e3a8a; border: 1px solid #3b82f6; box-shadow: 0 0 20px rgba(59,130,246,0.2); }
+        .box-header { text-align: center; padding: 8px; border-bottom: 1px solid rgba(251,191,36,0.3); color: #fbbf24; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.1em; }
+        #modalOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center; }
+        .scale-in { animation: scaleIn 0.2s ease-out; }
+        @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        /* Mobile Optimization */
+        @media (max-width: 768px) { 
+            body { overflow-y: auto; height: auto; } 
+            .flex-row-mobile { flex-direction: column; } 
+            aside { width: 100% !important; }
+            .grid-mobile { grid-template-columns: 1fr !important; }
+        }
+    </style>
+</head>
+<body class="flex flex-row-mobile p-4 gap-6">
+
+    <aside class="w-1/4 flex flex-col">
+        <div class="mb-4 px-2">
+            <h1 class="text-2xl font-black text-yellow-500 uppercase italic leading-tight">VVIP BHARADAKSA</h1>
+            <p id="liveDay" class="text-[10px] text-blue-400 font-bold uppercase"></p>
+            <p id="liveClock" class="text-2xl font-mono font-black"></p>
+        </div>
+
+        <div class="sidebar-section">
+            <form id="patientForm" onsubmit="savePatient(event)" class="space-y-3">
+                <input type="text" id="nama" placeholder="NAMA PASIEN" class="input-dark w-full p-2.5 rounded-lg" required>
+                <div class="flex gap-2">
+                    <input type="number" id="umur" placeholder="Umur" class="input-dark w-1/3 p-2.5 rounded-lg">
+                    <select id="penjamin" class="input-dark w-2/3 p-2.5 rounded-lg">
+                        <option>BPJS</option><option>UMUM</option><option>POLRI</option><option>ASURANSI</option>
+                    </select>
+                </div>
+                <select id="dpjpSelect" class="input-dark w-full p-2.5 rounded-lg"></select>
+                <input type="text" id="diagnosa" placeholder="Diagnosa Utama" class="input-dark w-full p-2.5 rounded-lg">
+                <select id="ruangSelect" class="input-dark w-full p-2.5 rounded-lg" required></select>
+                <button type="submit" class="bg-yellow-500 text-black w-full py-3 rounded-xl font-bold text-xs uppercase shadow-lg shadow-yellow-900/20">Simpan Pasien</button>
+            </form>
+        </div>
+
+        <button onclick="sendWhatsApp()" class="bg-green-600 hover:bg-green-700 w-full py-4 rounded-xl font-bold text-xs uppercase flex items-center justify-center gap-3 transition-all shadow-lg shadow-green-900/20">
+            <i class="fab fa-whatsapp text-lg"></i> Kirim Laporan WA
+        </button>
+    </aside>
+
+    <main class="flex-1">
+        <div class="mb-4 flex justify-between items-end px-2">
+            <span class="text-[10px] text-yellow-500 font-bold uppercase tracking-[0.2em]">Live Monitoring System</span>
+            <span class="text-xs font-black uppercase">BOR: <span id="borStat" class="text-blue-400"></span></span>
+        </div>
+        <div id="patientGrid" class="grid grid-cols-4 grid-mobile gap-4"></div>
+    </main>
+
+    <div id="modalOverlay" onclick="if(event.target == this) closeModal()">
+        <div class="bg-[#0f172a] border border-blue-500 p-8 rounded-3xl w-full max-w-sm shadow-2xl">
+            <h2 id="modalTitle" class="text-2xl font-black text-yellow-500 uppercase"></h2>
+            <p id="modalPatientSub" class="text-xs text-blue-300 font-bold mb-4"></p>
+            <textarea id="noteInput" rows="7" class="input-dark w-full p-4 rounded-xl mb-4 text-xs leading-relaxed" placeholder="Tulis perkembangan medis di sini..."></textarea>
+            <div class="flex gap-3 mb-6">
+                <button onclick="closeModal()" class="flex-1 bg-slate-800 py-3 rounded-xl font-bold text-xs text-gray-400">BATAL</button>
+                <button onclick="saveNote()" class="flex-1 bg-yellow-500 text-black py-3 rounded-xl font-bold text-xs uppercase tracking-widest">SIMPAN</button>
+            </div>
+            <div class="border-t border-white/5 pt-4 flex justify-center">
+                <button onclick="checkoutPatient()" class="text-red-500 border border-red-500/30 px-4 py-2 rounded-lg text-[9px] font-bold uppercase hover:bg-red-500 hover:text-white transition-all">🚪 Pulangkan Pasien</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
