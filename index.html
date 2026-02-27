@@ -160,15 +160,15 @@
         }, 1000);
 
         window.sendWhatsApp = () => {
-            let msg = `*LAPORAN VVIP BHARADAKSA*%0A📅 _${document.getElementById('liveDay').innerText}_%0A📊 *BOR:* ${document.getElementById('borStat').innerText}%0A%0A*🏥 STATUS BED:*%0A`;
+            let msg = `*Mohon Ijin Komandan, LAPORAN BED VVIP BHARADAKSA*%0A📅 _${document.getElementById('liveDay').innerText}_%0A📊 *BOR:* ${document.getElementById('borStat').innerText}%0A%0A*🏥 STATUS BED:*%0A`;
             rooms.forEach((r, i) => {
                 const p = patients[r.replace(/\s+/g, '_')];
                 msg += `${i+1}. ${r}: ${p ? '*TERISI* ('+p.nama+')' : '_KOSONG_' }%0A`;
             });
-            msg += `%0A*📝 DETAIL PASIEN:*%0A%0A`;
+            msg += ``;
             for(let key in patients) {
                 let p = patients[key];
-                msg += `*${key.replace(/_/g, ' ')}*%0A👤 ${p.nama}%0A🩺 ${p.diagnosa}%0A👨‍⚕️ DPJP: ${p.dpjp}%0A📝 Catatan: _${p.catatan.replace(/\n/g, '%0A')}_%0A%0A`;
+               
             }
             window.open(`https://wa.me/?text=${msg}`, '_blank');
         };
