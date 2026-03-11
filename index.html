@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VVIP Bharadaksa - Smart Command Center v11.9</title>
+    <title>VVIP Bharadaksa - Smart Command Center v11.7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -61,7 +61,7 @@
             if (n.includes("SP.JP") || n.includes("JANTUNG")) return specialistIcons["SP.JP"];
             if (n.includes("SP.N") || n.includes("SARAF") || n.includes("NEURO")) return specialistIcons["SP.N"];
             if (n.includes("SP.OG") || n.includes("KANDUNGAN")) return specialistIcons["SP.OG"];
-            if (n.includes("SP.THT")) return specialistIcons["SP.THT"];
+            if (n.includes("SP.THT") || n.includes("THT")) return specialistIcons["SP.THT"];
             if (n.includes("SP.M") || n.includes("MATA")) return specialistIcons["SP.M"];
             if (n.includes("SP.AN")) return specialistIcons["SP.AN"];
             return specialistIcons.DEFAULT;
@@ -113,6 +113,23 @@
             }
         }
 
+        window.hitungObat = () => {
+            const minta = parseFloat(document.getElementById('calcMinta').value);
+            const sedia = parseFloat(document.getElementById('calcSedia').value);
+            const isi = parseFloat(document.getElementById('calcIsi').value);
+            const resultDiv = document.getElementById('calcResult');
+            const resultValue = document.getElementById('resultValue');
+
+            if (minta > 0 && sedia > 0 && isi > 0) {
+                const hasil = (minta / sedia) * isi;
+                resultValue.className = (hasil > isi) ? "text-2xl font-black text-red-500 animate-pulse" : "text-2xl font-black text-white";
+                resultValue.innerHTML = `${hasil.toLocaleString('id-ID', {maximumFractionDigits: 2})} <span class="text-xs">cc</span>`;
+                resultDiv.classList.remove('hidden');
+            } else {
+                alert("Lengkapi data dengan angka positif!");
+            }
+        };
+
         window.savePatient = (e) => {
             e.preventDefault();
             const r = document.getElementById('ruangSelect').value;
@@ -120,10 +137,10 @@
             const data = {
                 nama: document.getElementById('nama').value,
                 umur: document.getElementById('umur').value,
-                gender: document.getElementById('gender').value,
                 diagnosa: document.getElementById('diagnosa').value,
                 penjamin: document.getElementById('penjamin').value,
                 dpjp: document.getElementById('dpjpSelect').value,
+                status: document.getElementById('statusPasien').value,
                 catatan: "Belum ada catatan."
             };
             set(ref(db, 'patients/' + r.replace(/\s+/g, '_')), data);
@@ -134,7 +151,8 @@
             const roomKey = currentRoom.replace(/\s+/g, '_');
             update(ref(db, 'patients/' + roomKey), {
                 diagnosa: document.getElementById('editDiagnosa').value.toUpperCase(),
-                catatan: document.getElementById('noteInput').value || "Belum ada catatan."
+                catatan: document.getElementById('noteInput').value || "Belum ada catatan.",
+                status: document.getElementById('editStatus').value
             });
             closeModal();
         };
@@ -160,47 +178,71 @@
                 if (p) {
                     count++;
                     const s = getSpec(p.dpjp);
-                    const genderColor = p.gender === 'P' ? 'border-pink-500 shadow-[0_0_25px_rgba(236,72,153,0.4)]' : 'border-blue-500 shadow-[0_0_25px_rgba(59,130,246,0.4)]';
-                    const genderIcon = p.gender === 'P' ? 'fa-venus text-pink-400' : 'fa-mars text-blue-400';
-                    const genderBg = p.gender === 'P' ? 'from-pink-900/40' : 'from-blue-900/40';
+                    
+                    // Logic Auto-Resize Nama Pasien
+                    let nameSizeClass = "text-clamp-normal";
+                    if(p.nama.length > 25) { nameSizeClass = "text-clamp-small"; }
+                    else if(p.nama.length > 18) { nameSizeClass = "text-clamp-medium"; }
+
+                    // Logic Auto-Resize Nama DPJP
+                    let dpjpSizeClass = "dpjp-normal";
+                    if(p.dpjp.length > 25) { dpjpSizeClass = "dpjp-small"; }
+                    else if(p.dpjp.length > 18) { dpjpSizeClass = "dpjp-medium"; }
+
+                    let triageClass = "border-blue-500"; 
+                    let statusColor = "text-blue-400";
+                    let statusBg = "bg-blue-900/40";
+                    if(p.status === "OBSERVASI") { 
+                        triageClass = "border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)]"; 
+                        statusColor = "text-yellow-400"; 
+                        statusBg = "bg-yellow-900/40";
+                    }
+                    if(p.status === "KETAT") { 
+                        triageClass = "border-red-600 shadow-[0_0_20px_rgba(220,38,38,0.3)]"; 
+                        statusColor = "text-red-500"; 
+                        statusBg = "bg-red-900/40";
+                    }
 
                     grid.innerHTML += `
-                        <div onclick="openModal('${room}')" class="box-bed flex flex-col scale-in relative overflow-hidden h-full group border-2 ${genderColor} bg-gradient-to-br ${genderBg} to-[rgba(10,15,29,0.42)] backdrop-blur-xl">
-                            <div class="box-header-terisi flex justify-between items-center px-4 py-2 bg-black/60">
-                                <span class="font-black text-[10px] tracking-widest text-white">${room}</span>
-                                <i class="fas ${genderIcon} text-xs"></i>
-                            </div>
+                        <div onclick="openModal('${room}')" class="box-bed box-terisi flex flex-col scale-in relative overflow-hidden h-full group border-2 ${triageClass}">
+                            <div class="box-header-terisi">${room}</div>
                             <div class="p-4 md:p-6 flex-1 flex flex-col justify-center z-10 min-h-0">
-                                <h4 class="nama-pasien font-black text-white uppercase leading-none truncate">${p.nama}</h4>
-                                <div class="flex items-center gap-3 mt-2">
-                                    <span class="detail-pasien text-blue-400 font-black">${p.umur} Thn</span>
-                                    <span class="h-1.5 w-1.5 rounded-full bg-white/40"></span>
-                                    <span class="detail-pasien text-yellow-500 font-black">${p.penjamin}</span>
+                                <div class="mb-1">
+                                    <h4 class="nama-pasien font-black text-white uppercase leading-tight ${nameSizeClass}">${p.nama}</h4>
                                 </div>
-                                <p class="detail-pasien text-white font-black italic mt-1 uppercase line-clamp-1 bg-black/60 px-2 py-1 rounded border border-white/20 shadow-inner">
+                                <div class="flex items-center gap-3 mt-1">
+                                    <span class="detail-pasien text-blue-400 font-bold">${p.umur} Thn</span>
+                                    <span class="h-1.5 w-1.5 rounded-full bg-white/20"></span>
+                                    <span class="detail-pasien text-yellow-500 font-bold">${p.penjamin}</span>
+                                </div>
+                                <p class="detail-pasien text-white font-black italic mt-2 uppercase line-clamp-1 bg-white/5 px-2 py-0.5 rounded border border-white/10 shadow-inner">
                                     ${p.diagnosa || '-'}
                                 </p>
-                                <div class="dpjp-container mt-3 pt-3 border-t border-white/20 flex items-start gap-4">
-                                    <div class="icon-bg-doc flex-shrink-0 w-12 h-12 rounded-xl bg-black/70 flex items-center justify-center border border-white/20 group-hover:border-yellow-500/50 transition-all shadow-xl">
-                                        <i class="fas ${s.icon} ${s.color} text-2xl"></i>
+                                <div class="dpjp-container mt-3 pt-2 border-t border-white/10 flex items-start gap-4">
+                                    <div class="icon-bg-doc flex-shrink-0 w-10 h-10 rounded-lg bg-black/50 flex items-center justify-center border border-white/10 group-hover:border-yellow-500/50 transition-all">
+                                        <i class="fas ${s.icon} ${s.color} text-xl"></i>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="label-dpjp text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">DPJP Utama</p>
-                                        <p class="dpjp-text font-black text-[#D4AF37] break-words leading-tight group-hover:text-yellow-400">${p.dpjp || '-'}</p>
-                                        <p class="label-spesialis text-[9px] ${s.color} font-black opacity-90 mt-1 uppercase">${s.label}</p>
+                                        <p class="label-dpjp text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">DPJP</p>
+                                        <p class="dpjp-text font-black text-[#D4AF37] break-words leading-tight ${dpjpSizeClass}">${p.dpjp || '-'}</p>
+                                        <p class="label-spesialis text-[8px] ${s.color} font-bold opacity-80 mt-1 uppercase">${s.label}</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="absolute top-10 right-3 w-3 h-3 rounded-full bg-red-500 shadow-[0_0_20px_#ef4444] animate-pulse"></div>
+                            <div class="absolute bottom-2 right-2 z-20">
+                                <span class="status-label-new font-black px-3 py-1 rounded-lg border-2 ${statusColor} ${statusBg} border-current uppercase">
+                                    ${p.status || 'STABIL'}
+                                </span>
+                            </div>
                         </div>`;
                 } else {
                     rSelect.innerHTML += `<option value="${room}">${room}</option>`;
                     grid.innerHTML += `
-                        <div class="box-kosong-new flex items-center justify-center rounded-2xl relative overflow-hidden group min-h-[180px] border border-white/10 bg-[rgba(15,23,42,0.42)] backdrop-blur-md">
-                            <div class="box-header-kosong absolute top-0 w-full text-center py-2 text-[10px] font-black tracking-widest bg-black/40 text-slate-500 uppercase">${room}</div>
-                            <div class="text-center opacity-30 group-hover:opacity-70 transition-all">
-                                <i class="fas fa-bed text-slate-500 text-3xl mb-2 block"></i>
-                                <p class="label-kosong text-[11px] font-black uppercase tracking-widest">BED TERSEDIA</p>
+                        <div class="box-kosong-new flex items-center justify-center rounded-2xl relative overflow-hidden group min-h-[180px]">
+                            <div class="box-header-kosong absolute top-0 w-full">${room}</div>
+                            <div class="text-center opacity-40">
+                                <i class="fas fa-bed text-slate-700 text-2xl mb-2 block"></i>
+                                <p class="label-kosong text-[10px] font-black uppercase tracking-tighter">BED KOSONG</p>
                             </div>
                         </div>`;
                 }
@@ -213,7 +255,7 @@
         window.updateRunningText = () => {
             const marqueeText = document.getElementById('marqueeText');
             if(!marqueeText) return;
-            const content = `SELAMAT DATANG DI VVIP BHARA DAKSA • JAGA KETENANGAN DI AREA RUANG PERAWATAN • JAGA KEBERSIHAN RUANGAN RAWAT INAP • RUMKIT BHAYANGKARA PALU MELAYANI DENGAN SEPENUH HATI • `;
+            const content = `SELAMAT DATANG DI VVIP BHARA DAKSA • JAGA KETENANGAN DI AREA RUANG PERAWATAN • RUMKIT BHAYANGKARA PALU MELAYANI DENGAN SEPENUH HATI • `;
             marqueeText.innerHTML = (content + content).toUpperCase();
         }
 
@@ -222,8 +264,9 @@
             const p = patients[r.replace(/\s+/g, '_')];
             if(!p) return;
             document.getElementById('modalTitle').innerText = r;
-            document.getElementById('modalPatientSub').innerText = `${p.nama} (${p.umur} Thn | ${p.gender})`;
+            document.getElementById('modalPatientSub').innerText = `${p.nama} (${p.umur} Thn)`;
             document.getElementById('editDiagnosa').value = p.diagnosa || "";
+            document.getElementById('editStatus').value = p.status || "STABIL";
             document.getElementById('noteInput').value = p.catatan === "Belum ada catatan." ? "" : p.catatan;
             document.getElementById('modalOverlay').style.display = 'flex';
         };
@@ -232,27 +275,19 @@
         setInterval(() => {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const dateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' });
             if(document.getElementById('liveClock')) document.getElementById('liveClock').innerText = timeStr;
             if(document.getElementById('liveDay')) document.getElementById('liveDay').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
             if(document.getElementById('tvClockTicker')) document.getElementById('tvClockTicker').innerText = timeStr;
-            if(document.getElementById('tvDateTicker')) document.getElementById('tvDateTicker').innerText = dateStr.toUpperCase();
+            if(document.getElementById('tvDateTicker')) document.getElementById('tvDateTicker').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase();
         }, 1000);
 
-        window.toggleTVMode = () => {
-            const isTV = document.body.classList.toggle('tv-mode-active');
-            if (isTV) {
-                if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-            }
-        };
+        window.toggleTVMode = () => document.body.classList.toggle('tv-mode-active');
 
         window.sendWhatsApp = () => {
             let msg = `*LAPORAN VVIP BHARADAKSA*%0A📊 *BOR:* ${document.getElementById('borStat').innerText}%0A%0A`;
             rooms.forEach((r, i) => {
                 const p = patients[r.replace(/\s+/g, '_')];
-                msg += `${i+1}. ${r}: ${p ? '*TERISI* ('+p.nama+' / '+p.gender+')' : '_KOSONG_' }%0A`;
+                msg += `${i+1}. ${r}: ${p ? '*TERISI* ('+p.nama+') - Status: '+p.status : '_KOSONG_' }%0A`;
             });
             window.open(`https://wa.me/?text=${msg}`, '_blank');
         };
@@ -261,61 +296,68 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #020617; color: white; margin: 0; overflow: hidden; height: 100vh; position: relative; }
         
-        /* WALLPAPER BACKGROUND */
-        .tv-wallpaper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-image: url('https://bidkesmapta.com/images/rumkit/13/300-Rumkit-Bhayangkara-TK-III-Palu.jpeg'); background-size: cover; background-position: center; display: none; }
-        .tv-wallpaper::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(2, 6, 23, 0.4) 0%, rgba(2, 6, 23, 0.8) 100%); }
-        
-        body.tv-mode-active { background-color: transparent !important; }
-        body.tv-mode-active .tv-wallpaper { display: block; animation: fadeIn 1.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .tv-wallpaper { 
+            position: fixed; inset: 0; z-index: -2; 
+            background-image: url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=1920'); 
+            background-size: cover; background-position: center; display: none; 
+        }
+        .tv-wallpaper::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(2, 6, 23, 0.75) 0%, rgba(2, 6, 23, 0.98) 100%); }
 
-        .app-container { display: flex; flex-direction: row; gap: 1.5rem; padding: 1.5rem; height: 100vh; overflow: hidden; position: relative; z-index: 10; }
+        body.tv-mode-active .tv-wallpaper { display: block !important; }
+        body.tv-mode-active { background-color: transparent !important; }
+
+        .app-container { display: flex; gap: 1.5rem; padding: 1.5rem; height: 100vh; overflow: hidden; position: relative; z-index: 10; }
         aside { width: 22%; height: 100%; overflow-y: auto; padding-right: 10px; border-right: 1px solid rgba(255,255,255,0.05); }
         main { flex: 1; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
         
-        .sidebar-section { background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
-        .input-dark { background-color: #1e293b; border: 1px solid #334155; color: white; font-size: 0.85rem; outline: none; }
+        .sidebar-section { background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
+        .input-dark { background-color: #1e293b; border: 1px solid #334155; color: white; font-size: 0.85rem; }
         
-        /* BOX BED STYLING (DISET KE 42% OPACITY) */
-        .box-bed { background-color: rgba(15, 23, 42, 0.42); border-radius: 24px; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
-        .box-bed:hover { transform: translateY(-5px); border-color: #fbbf24 !important; background-color: rgba(15, 23, 42, 0.55); }
-
-        /* --- TV MODE OVERRIDES --- */
+        .box-bed { background-color: #0f172a; border-radius: 20px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
+        .box-terisi { background: linear-gradient(145deg, #1e3a8a, #0f172a); }
+        .box-kosong-new { background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.03); }
+        .box-header-terisi { text-align: center; padding: 6px; color: #fbbf24; font-weight: 800; font-size: 2.0rem; background: rgba(0,0,0,0.2); }
+        
+        #modalOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; padding: 20px; }
+        
+        /* -------------------------------------------------------------------------- */
+        /* MODE TV ADJUSTMENTS */
+        /* -------------------------------------------------------------------------- */
         body.tv-mode-active aside { display: none !important; }
         body.tv-mode-active main { width: 100vw !important; height: 100vh !important; padding: 30px 50px 110px 50px !important; }
         body.tv-mode-active .normal-header, body.tv-mode-active .box-kosong-new { display: none !important; }
         
-        body.tv-mode-active #patientGrid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)) !important; grid-auto-rows: 1fr; gap: 25px; flex: 1; min-height: 0; align-content: start; }
-
-        /* BOX BED MODE TV (DISET KE 42% OPACITY) */
-        body.tv-mode-active .box-bed { 
-            background: rgba(15, 23, 42, 0.42); 
-            backdrop-filter: blur(25px); 
-            -webkit-backdrop-filter: blur(25px);
-            border-width: 5px; 
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        body.tv-mode-active #patientGrid { 
+            grid-template-columns: repeat(3, 1fr) !important; 
+            gap: 30px; 
+            align-content: start;
         }
 
-        body.tv-mode-active .box-header-terisi { font-size: 1.7rem; padding: 14px 28px; background: rgba(0,0,0,0.5); }
-        body.tv-mode-active .nama-pasien { font-size: 2.3rem; letter-spacing: -1px; text-shadow: 0 4px 12px rgba(0,0,0,0.9); }
-        body.tv-mode-active .detail-pasien { font-size: 1.25rem; }
-        body.tv-mode-active .dpjp-text { font-size: 1.45rem; color: #fbbf24; }
-        body.tv-mode-active .icon-bg-doc { width: 65px; height: 65px; border-width: 2px; }
-        body.tv-mode-active .icon-bg-doc i { font-size: 2.8rem; }
-        body.tv-mode-active .label-spesialis { font-size: 1.25rem !important; margin-top: 8px; background: rgba(0,0,0,0.6); padding: 4px 15px; border-radius: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.1); }
+        /* AUTO-RESIZE NAMA PASIEN */
+        body.tv-mode-active .text-clamp-normal { font-size: 3rem !important; }
+        body.tv-mode-active .text-clamp-medium { font-size: 2.3rem !important; }
+        body.tv-mode-active .text-clamp-small { font-size: 1.8rem !important; }
 
-        /* TICKER SYSTEM */
-        .ticker-wrapper { display: none; position: fixed; bottom: 0; left: 0; width: 100%; height: 95px; background: #fbbf24; z-index: 9999; align-items: center; border-top: 6px solid #000; box-shadow: 0 -15px 40px rgba(0,0,0,0.6); }
+        /* AUTO-RESIZE NAMA DPJP */
+        body.tv-mode-active .dpjp-normal { font-size: 1.9rem !important; line-height: 1.2; }
+        body.tv-mode-active .dpjp-medium { font-size: 1.5rem !important; line-height: 1.2; }
+        body.tv-mode-active .dpjp-small { font-size: 1.2rem !important; line-height: 1.1; }
+
+        /* LABEL SPESIALIS & TRIAGE */
+        body.tv-mode-active .label-spesialis { font-size: 1.3rem !important; font-weight: 900 !important; opacity: 1 !important; margin-top: 4px; }
+        body.tv-mode-active .status-label-new { font-size: 0.8rem !important; letter-spacing: 0.05em; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        body.tv-mode-active .icon-bg-doc { width: 70px !important; height: 70px !important; }
+        body.tv-mode-active .icon-bg-doc i { font-size: 2.5rem !important; }
+
+        /* TICKER */
+        .ticker-wrapper { display: none; position: fixed; bottom: 0; left: 0; width: 100%; height: 95px; background: #fbbf24; z-index: 9999; align-items: center; border-top: 5px solid #000; }
         body.tv-mode-active .ticker-wrapper { display: flex; }
-        .ticker-clock-box { background: #000; color: #fff; height: 100%; padding: 0 40px; display: flex; flex-direction: column; justify-content: center; text-align: center; border-right: 6px solid #fbbf24; min-width: 320px; }
-        #tvClockTicker { font-size: 3.5rem; font-weight: 900; font-family: monospace; color: #fbbf24; line-height: 1; }
-        #tvDateTicker { font-size: 1.2rem; font-weight: 800; color: #64748b; margin-top: 2px; }
-        .marquee-modern { font-weight: 900; font-size: 3rem; color: #000; animation: marquee-anim 25s linear infinite; white-space: nowrap; }
+        .ticker-clock-box { background: #000; height: 100%; padding: 0 35px; display: flex; flex-direction: column; justify-content: center; text-align: center; min-width: 320px; }
+        #tvClockTicker { font-size: 3.5rem; font-weight: 900; color: #fbbf24; line-height: 1; font-family: monospace; }
+        #tvDateTicker { font-size: 1.1rem; font-weight: 800; color: #64748b; }
+        .marquee-modern { font-weight: 900; font-size: 3rem; color: #000; animation: marquee-anim 30s linear infinite; white-space: nowrap; }
         @keyframes marquee-anim { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-        #modalOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 99999; align-items: center; justify-content: center; padding: 20px; }
-        @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .scale-in { animation: scaleIn 0.3s ease forwards; }
     </style>
 </head>
 <body>
@@ -327,53 +369,73 @@
             <div id="tvClockTicker">00:00:00</div>
             <div id="tvDateTicker">SENIN, 01 JAN</div>
         </div>
-        <div class="ticker-info text-black font-black px-6 text-2xl tracking-tighter italic">VVIP BP:</div>
+        <div class="ticker-info text-black font-black px-6 text-2xl italic">INFO:</div>
         <div class="ticker-content flex-1 overflow-hidden">
             <div class="marquee-modern" id="marqueeText"></div>
         </div>
     </div>
 
-    <button onclick="toggleTVMode()" class="fixed bottom-28 right-8 z-[10000] bg-blue-600 hover:bg-blue-500 text-white w-18 h-18 rounded-full shadow-[0_0_40px_rgba(37,99,235,0.6)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all border-4 border-white/20 p-5">
-        <i class="fas fa-tv text-3xl"></i>
+    <button onclick="toggleTVMode()" class="fixed bottom-24 right-8 z-[10000] bg-blue-600 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all border-4 border-white/10">
+        <i class="fas fa-tv text-2xl"></i>
     </button>
 
     <div class="app-container">
         <aside>
-            <div class="mb-8">
+            <div class="mb-4">
                 <h1 class="text-2xl font-black text-yellow-500 italic uppercase leading-none tracking-tighter">VVIP BHARADAKSA</h1>
-                <p id="liveDay" class="text-[11px] text-blue-400 font-bold uppercase mt-2 tracking-widest"></p>
+                <p id="liveDay" class="text-[10px] text-blue-400 font-bold uppercase mt-2 tracking-widest"></p>
                 <p id="liveClock" class="text-4xl font-black font-mono mt-1 text-white"></p>
             </div>
 
-            <div class="sidebar-section">
+            <div class="sidebar-section border-yellow-500/20">
+                <h3 class="text-[10px] font-black text-yellow-500 mb-3 uppercase tracking-widest">Input Data Pasien</h3>
                 <form id="patientForm" onsubmit="savePatient(event)" class="space-y-4">
-                    <input type="text" id="nama" placeholder="NAMA PASIEN" class="input-dark w-full p-4 rounded-xl uppercase font-black tracking-tight" required>
-                    <div class="grid grid-cols-3 gap-2">
+                    <input type="text" id="nama" placeholder="NAMA PASIEN" class="input-dark w-full p-4 rounded-xl uppercase font-black" required>
+                    <div class="grid grid-cols-2 gap-3">
                         <input type="number" id="umur" placeholder="Umur" class="input-dark w-full p-4 rounded-xl font-bold">
-                        <select id="gender" class="input-dark w-full p-4 rounded-xl font-black">
-                            <option value="L">L</option>
-                            <option value="P">P</option>
-                        </select>
-                        <select id="penjamin" class="input-dark w-full p-4 rounded-xl font-black text-[10px]">
+                        <select id="penjamin" class="input-dark w-full p-4 rounded-xl font-black">
                             <option>BPJS</option><option>UMUM</option><option>POLRI</option><option>ASURANSI</option>
                         </select>
                     </div>
+                    <select id="statusPasien" class="input-dark w-full p-4 rounded-xl font-black text-yellow-500 bg-black/40">
+                        <option value="STABIL">STATUS: STABIL (BIRU)</option>
+                        <option value="OBSERVASI">STATUS: OBSERVASI (KUNING)</option>
+                        <option value="KETAT">STATUS: KETAT (MERAH)</option>
+                    </select>
                     <select id="dpjpSelect" class="input-dark w-full p-4 rounded-xl font-bold" required></select>
-                    <input type="text" id="diagnosa" placeholder="Diagnosa Awal" class="input-dark w-full p-4 rounded-xl uppercase font-bold">
+                    <input type="text" id="diagnosa" placeholder="Diagnosa" class="input-dark w-full p-4 rounded-xl uppercase font-bold">
                     <select id="ruangSelect" class="input-dark w-full p-4 rounded-xl font-black" required></select>
-                    <button type="submit" class="bg-yellow-500 hover:bg-yellow-400 text-black w-full py-4 rounded-xl font-black text-sm uppercase transition-colors shadow-lg">Simpan Pasien</button>
+                    <button type="submit" class="bg-yellow-500 hover:bg-yellow-400 text-black w-full py-4 rounded-xl font-black text-sm uppercase transition-all">Simpan Pasien</button>
                 </form>
             </div>
 
-            <div class="sidebar-section">
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="newDocName" placeholder="Nama Dokter..." class="input-dark flex-1 p-3 rounded-xl font-bold">
-                    <button onclick="addDoctor()" class="bg-cyan-600 hover:bg-cyan-500 px-5 rounded-xl font-bold">+</button>
+            <div class="sidebar-section border-blue-500/30 bg-blue-900/10">
+                <h3 class="text-[10px] font-black text-blue-400 mb-3 uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-calculator"></i> Kalkulator Obat
+                </h3>
+                <div class="space-y-2">
+                    <input type="number" id="calcMinta" placeholder="PERLU (mg/mcg)" class="input-dark w-full p-3 rounded-xl font-bold border-blue-500/20">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" id="calcSedia" placeholder="TERSEDIA" class="input-dark w-full p-3 rounded-xl text-xs">
+                        <input type="number" id="calcIsi" placeholder="ISI (cc)" class="input-dark w-full p-3 rounded-xl text-xs">
+                    </div>
+                    <button onclick="hitungObat()" class="bg-blue-600 hover:bg-blue-500 text-white w-full py-3 rounded-xl font-black text-[10px] uppercase transition-all">Hitung</button>
+                    <div id="calcResult" class="hidden mt-2 p-3 bg-blue-600/20 border border-blue-500/40 rounded-xl text-center">
+                        <p id="resultValue" class="text-2xl font-black text-white">0</p>
+                    </div>
                 </div>
-                <ul id="docList" class="space-y-2 max-h-40 overflow-y-auto pr-2"></ul>
             </div>
 
-            <button onclick="sendWhatsApp()" class="bg-green-600 hover:bg-green-500 w-full py-4 rounded-xl font-black text-xs uppercase flex items-center justify-center gap-3 shadow-lg">
+            <div class="sidebar-section">
+                <h3 class="text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">Daftar Dokter</h3>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="newDocName" placeholder="Nama..." class="input-dark flex-1 p-3 rounded-xl font-bold text-xs">
+                    <button onclick="addDoctor()" class="bg-cyan-600 px-4 rounded-xl font-bold">+</button>
+                </div>
+                <ul id="docList" class="space-y-2 max-h-32 overflow-y-auto"></ul>
+            </div>
+
+            <button onclick="sendWhatsApp()" class="bg-green-600 hover:bg-green-500 w-full py-4 rounded-xl font-black text-xs uppercase flex items-center justify-center gap-3 transition-all">
                 <i class="fab fa-whatsapp text-xl"></i> Kirim Laporan WA
             </button>
         </aside>
@@ -382,43 +444,51 @@
             <div class="normal-header mb-6 flex justify-between items-end px-2">
                 <div>
                     <h2 class="text-2xl font-black uppercase tracking-tighter">Monitoring Bed VVIP</h2>
-                    <span class="text-xs text-yellow-500 font-bold uppercase tracking-[0.3em]">Okupansi Terkini (BOR): <span id="borStat" class="text-white ml-2"></span></span>
+                    <span class="text-xs text-yellow-500 font-bold uppercase tracking-widest">BOR: <span id="borStat" class="text-white ml-2"></span></span>
                 </div>
             </div>
 
-            <div class="tv-mode-active:flex hidden justify-between items-center mb-8 px-2 border-b-4 border-yellow-500 pb-6">
-                <h1 class="text-6xl font-black text-white italic tracking-tighter">VVIP BHARADAKSA <span class="text-yellow-500 ml-4 font-normal not-italic opacity-60">| COMMAND CENTER</span></h1>
+            <div class="tv-mode-active:flex hidden justify-between items-center mb-6 px-2 border-b-2 border-white/10 pb-4">
+                <h1 class="text-5xl font-black text-white italic tracking-tighter uppercase">VVIP BHARADAKSA</h1>
                 <div class="text-right">
-                    <p class="text-2xl font-bold text-slate-400 uppercase leading-none tracking-widest">OKUPANSI BED</p>
-                    <p id="borStatTV" class="text-7xl font-black text-yellow-500 mt-2"></p>
+                    <p class="text-xl font-bold text-slate-500 uppercase tracking-widest">OKUPANSI BED</p>
+                    <p id="borStatTV" class="text-5xl font-black text-yellow-500 mt-1"></p>
                 </div>
             </div>
             
-            <div id="patientGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-y-auto pr-2 min-h-0"></div>
+            <div id="patientGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-hidden"></div>
         </main>
     </div>
 
     <div id="modalOverlay" onclick="if(event.target == this) closeModal()">
-        <div class="bg-[#0f172a] border border-blue-500/30 w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl scale-in">
+        <div class="bg-[#0f172a] border border-blue-500/30 w-full max-w-lg rounded-3xl overflow-hidden">
             <div class="bg-blue-600 p-6 flex justify-between items-center">
-                <div>
-                    <h2 id="modalTitle" class="text-2xl font-black text-white leading-none">RUANG</h2>
-                    <p id="modalPatientSub" class="text-blue-100 font-bold mt-1 text-sm uppercase tracking-wider"></p>
-                </div>
-                <button onclick="closeModal()" class="text-white/50 hover:text-white text-2xl">✕</button>
+                <h2 id="modalTitle" class="text-2xl font-black text-white leading-none uppercase">RUANG</h2>
+                <button onclick="closeModal()" class="text-white/50 text-2xl">✕</button>
             </div>
             <div class="p-8 space-y-6">
-                <div>
-                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Update Diagnosa</label>
-                    <input type="text" id="editDiagnosa" class="input-dark w-full p-4 rounded-xl uppercase font-bold text-white">
+                <p id="modalPatientSub" class="text-blue-300 font-bold text-sm uppercase border-b border-white/10 pb-4"></p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Update Diagnosa</label>
+                        <input type="text" id="editDiagnosa" class="input-dark w-full p-4 rounded-xl uppercase font-bold text-white">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Update Status</label>
+                        <select id="editStatus" class="input-dark w-full p-4 rounded-xl font-black text-yellow-500">
+                            <option value="STABIL">STABIL</option>
+                            <option value="OBSERVASI">OBSERVASI</option>
+                            <option value="KETAT">KETAT</option>
+                        </select>
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Catatan Perkembangan</label>
-                    <textarea id="noteInput" rows="4" class="input-dark w-full p-4 rounded-xl text-white font-medium italic"></textarea>
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Catatan Medis</label>
+                    <textarea id="noteInput" rows="4" class="input-dark w-full p-4 rounded-xl text-white italic"></textarea>
                 </div>
-                <div class="grid grid-cols-2 gap-4 pt-4">
-                    <button onclick="checkoutPatient()" class="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white py-4 rounded-xl font-black text-xs uppercase transition-all border border-red-600/30">Checkout</button>
-                    <button onclick="saveNote()" class="bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black text-xs uppercase transition-all shadow-lg">Simpan</button>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="checkoutPatient()" class="border border-red-600 text-red-500 py-4 rounded-xl font-black uppercase">Checkout</button>
+                    <button onclick="saveNote()" class="bg-blue-600 text-white py-4 rounded-xl font-black uppercase shadow-lg">Simpan</button>
                 </div>
             </div>
         </div>
