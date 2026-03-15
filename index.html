@@ -115,25 +115,36 @@
     </div>
 
     <script type="module">
-        // --- FIREBASE INTEGRATION ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyA6zBIqZLRpQPBq6psw_Z3oGZ_SK_X0rfQ",
-            authDomain: "bhara-daksa.firebaseapp.com",
-            databaseURL: "https://bhara-daksa-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "bhara-daksa",
-            storageBucket: "bhara-daksa.firebasestorage.app",
-            messagingSenderId: "765829225964",
-            appId: "1:765829225964:web:acb32bf51f69bfe766f4c9",
-            measurementId: "G-GCYRJT9SFS"
+            apiKey: "AIzaSyDR0iUObfanmCgfSaCXHbWZEi2gDxyEhBE",
+            authDomain: "laporan-bhara-daksa.firebaseapp.com",
+            databaseURL: "https://laporan-bhara-daksa-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "laporan-bhara-daksa",
+            storageBucket: "laporan-bhara-daksa.firebasestorage.app",
+            messagingSenderId: "532273007065",
+            appId: "1:532273007065:web:c917977fe077cffd8571c8"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- 1. CONFIGURATION & DATA ---
+        // Ekspos ke Global
+        window.db = db;
+        window.dbRef = ref;
+        window.dbSet = set;
+        window.dbUpdate = update;
+        window.dbRemove = remove;
+        window.dbOnValue = onValue;
+
+        // Inisialisasi Sinkronisasi Realtime
+        initDataSync();
+    </script>
+
+    <script>
+        // --- 1. CONFIGURATION ---
         const masterRuangan = ["VVIP 01", "VVIP 02", "VVIP 03", "VVIP 04", "BHARA DAKSA 5A", "BHARA DAKSA 5B", "BHARA DAKSA 6A", "BHARA DAKSA 6B", "BHARA DAKSA 7A", "BHARA DAKSA 7B", "BHARA DAKSA 8A", "BHARA DAKSA 8B"];
         
         const specialistIcons = {
@@ -152,46 +163,44 @@
         };
 
         let databasePasien = [];
-        let daftarDokter = ["dr. Budi, Sp.JP", "dr. Ani, Sp.A"];
+        let daftarDokter = [];
 
-        // Firebase Listeners
-        onValue(ref(db, 'pasien'), (snapshot) => {
-            const data = snapshot.val();
-            databasePasien = data ? Object.keys(data).map(key => ({ ...data[key], fireId: key })) : [];
-            renderGrid();
-        });
+        // --- 2. FIREBASE SYNC ---
+        function initDataSync() {
+            if (!window.dbOnValue) { setTimeout(initDataSync, 500); return; }
 
-        onValue(ref(db, 'dokter'), (snapshot) => {
-            const data = snapshot.val();
-            if (data) daftarDokter = Object.values(data);
-        });
+            // Sync Pasien
+            window.dbOnValue(window.dbRef(window.db, 'pasien'), (snapshot) => {
+                const data = snapshot.val();
+                databasePasien = data ? Object.values(data) : [];
+                renderGrid();
+            });
 
-        // --- 2. LOGIC HELPERS ---
+            // Sync Dokter
+            window.dbOnValue(window.dbRef(window.db, 'dokter'), (snapshot) => {
+                const data = snapshot.val();
+                daftarDokter = data ? Object.values(data) : ["dr. Budi, Sp.JP", "dr. Ani, Sp.A"];
+            });
+        }
+
+        // --- 3. LOGIC HELPERS ---
         function getSpec(name) {
             if (!name) return specialistIcons.DEFAULT;
             const n = name.toUpperCase();
-            if (n.includes("SP.BS")) return specialistIcons["SP.BS"];
-            if (n.includes("SP.OT")) return specialistIcons["SP.OT"];
-            if (n.includes("SP.B")) return specialistIcons["SP.B"];
-            if (n.includes("SP.A")) return specialistIcons["SP.A"];
-            if (n.includes("SP.PD")) return specialistIcons["SP.PD"];
-            if (n.includes("SP.JP")) return specialistIcons["SP.JP"];
-            if (n.includes("SP.N")) return specialistIcons["SP.N"];
-            if (n.includes("SP.OG")) return specialistIcons["SP.OG"];
-            if (n.includes("SP.THT")) return specialistIcons["SP.THT"];
-            if (n.includes("SP.M")) return specialistIcons["SP.M"];
-            if (n.includes("SP.AN")) return specialistIcons["SP.AN"];
+            for (let key in specialistIcons) {
+                if (n.includes(key)) return specialistIcons[key];
+            }
             return specialistIcons.DEFAULT;
         }
 
-        window.updateClock = function() { document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false }); }
-        setInterval(window.updateClock, 1000); window.updateClock();
+        function updateClock() { document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false }); }
+        setInterval(updateClock, 1000); updateClock();
 
-        window.closePopup = function() { document.getElementById('popup-menu').style.opacity = '0'; document.getElementById('popup-menu').style.pointerEvents = 'none'; }
-        window.openPopup = function() { document.getElementById('popup-menu').style.opacity = '1'; document.getElementById('popup-menu').style.pointerEvents = 'auto'; }
+        function closePopup() { document.getElementById('popup-menu').style.opacity = '0'; document.getElementById('popup-menu').style.pointerEvents = 'none'; }
+        function openPopup() { document.getElementById('popup-menu').style.opacity = '1'; document.getElementById('popup-menu').style.pointerEvents = 'auto'; }
 
-        // --- 3. DASHBOARD RENDERER ---
-        window.renderGrid = function() {
+        // --- 4. RENDERER ---
+        function renderGrid() {
             const container = document.getElementById('grid-pasien');
             container.innerHTML = '';
             const sortedPasien = [...databasePasien].sort((a, b) => masterRuangan.indexOf(a.ruang) - masterRuangan.indexOf(b.ruang));
@@ -208,22 +217,20 @@
                             </div>
                             <div class="flex flex-col">
                                 <span class="text-[17px] font-bold text-slate-100 leading-tight">${docName}</span>
-                                 <span class="text-[11px] font-black ${s.color} uppercase tracking-tighter leading-none">${s.label}</span>
+                                <span class="text-[11px] font-black ${s.color} uppercase tracking-tighter leading-none">${s.label}</span>
                             </div>
                         </div>`;
                 }).join('');
 
                 const card = document.createElement('div');
                 card.className = `patient-card glass-panel rounded-[3rem] p-8 border-l-[6px] ${isElite ? 'border-l-amber-500 card-vvip' : 'border-l-cyan-500 card-bd'} ${!data.sudahVisite ? 'not-visite' : ''}`;
-                card.onclick = () => window.openEditPasien(data.fireId);
+                card.onclick = () => openEditPasien(data.id);
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-6">
                         <div class="px-5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-lg font-header font-black ${isElite ? 'text-amber-400' : 'text-cyan-400'}">${data.ruang}</div>
                         <div class="flex items-center gap-2">
-                            ${pendingTasks > 0 ? `<div class="px-2.5 py-1 bg-red-600 rounded-full animate-pulse flex items-center gap-1"><i class="fa-solid fa-list-check text-[10px] text-white"></i><span class="text-[10px] font-black text-white">${pendingTasks}</span></div>` : ''}
-                            <div class="px-3 py-1 rounded-full text-[8px] font-black ${data.sudahVisite ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'} uppercase">
-                                ${data.sudahVisite ? '● Visited' : '○ Not Visited'}
-                            </div>
+                            ${pendingTasks > 0 ? `<div class="px-2.5 py-1 bg-red-600 rounded-full animate-pulse flex items-center gap-1 shadow-lg shadow-red-600/20"><i class="fa-solid fa-list-check text-[10px] text-white"></i><span class="text-[10px] font-black text-white">${pendingTasks}</span></div>` : ''}
+                            <div class="px-3 py-1 rounded-full text-[8px] font-black ${data.sudahVisite ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'} uppercase">${data.sudahVisite ? '● Visited' : '○ Not Visited'}</div>
                         </div>
                     </div>
                     <div class="mb-4">
@@ -231,164 +238,139 @@
                         <p class="text-sm font-bold text-slate-500 uppercase mt-1">${data.umur} THN • <span class="${isElite ? 'text-amber-500' : 'text-cyan-500'}">${data.penjamin}</span></p>
                     </div>
                     <p class="text-md font-bold text-slate-200 uppercase mb-4">${data.diagnosa}</p>
-                    <div class="border-t border-white/3 pt-4 flex flex-col">${dpjpHtml}</div>
-                `;
+                    <div class="border-t border-white/3 pt-4 flex flex-col">${dpjpHtml}</div>`;
                 container.appendChild(card);
             });
         }
 
-        // --- 4. DATA MANAGEMENT ---
-        window.openInputPasien = function() {
-            document.getElementById('popup-title').innerText = "Register Pasien";
-            const tersedia = masterRuangan.filter(r => !databasePasien.map(p => p.ruang).includes(r));
-            let html = `
-                <form id="form-pasien" class="space-y-4">
-                    <input type="text" id="p-nama" class="w-full p-4 rounded-2xl font-bold" placeholder="NAMA LENGKAP" required>
-                    <div class="grid grid-cols-2 gap-4">
-                        <select id="p-ruang" class="p-4 rounded-2xl font-bold" required>${tersedia.map(r => `<option value="${r}">${r}</option>`).join('')}</select>
-                        <input type="number" id="p-umur" class="p-4 rounded-2xl font-bold" placeholder="UMUR" required>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <select id="p-penjamin" class="p-4 rounded-2xl font-bold"><option>BPJS</option><option>POLRI</option><option>UMUM</option><option>ASURANSI</option></select>
-                        <input type="text" id="p-diagnosa" class="p-4 rounded-2xl font-bold" placeholder="DIAGNOSA" required>
-                    </div>
-                    <div class="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
-                        <p class="text-[9px] font-bold text-slate-500 mb-2">PILIH DPJP UTAMA & KONSULAN:</p>
-                        ${daftarDokter.map(d => `<label class="flex items-center p-3 bg-white/5 rounded-xl cursor-pointer"><input type="checkbox" value="${d}" class="p-input-doc w-5 h-5 mr-3 accent-indigo-500"><span class="text-xs font-bold text-slate-300">${d}</span></label>`).join('')}
-                    </div>
-                    <button type="submit" class="w-full py-5 bg-indigo-600 rounded-2xl font-header font-bold text-white shadow-xl">DAFTARKAN PASIEN</button>
-                </form>`;
-            document.getElementById('modal-content').innerHTML = html;
-            document.getElementById('form-pasien').onsubmit = window.savePasien;
-            window.openPopup();
-        }
-
-        window.savePasien = function(e) {
+        // --- 5. ACTIONS ---
+        function savePasien(e) {
             e.preventDefault();
-            const newPasien = {
-                nama: document.getElementById('p-nama').value,
-                ruang: document.getElementById('p-ruang').value,
-                umur: document.getElementById('p-umur').value,
-                penjamin: document.getElementById('p-penjamin').value,
-                diagnosa: document.getElementById('p-diagnosa').value,
+            const id = Date.now();
+            const pData = {
+                id: id, nama: document.getElementById('p-nama').value,
+                ruang: document.getElementById('p-ruang').value, umur: document.getElementById('p-umur').value,
+                penjamin: document.getElementById('p-penjamin').value, diagnosa: document.getElementById('p-diagnosa').value,
                 dpjp: Array.from(document.querySelectorAll('.p-input-doc:checked')).map(cb => cb.value),
                 tasks: [], catatan: "", sudahVisite: false
             };
-            push(ref(db, 'pasien'), newPasien);
-            window.closePopup();
+            window.dbSet(window.dbRef(window.db, 'pasien/' + id), pData);
+            closePopup();
         }
 
-        window.openEditPasien = function(fireId) {
-            const p = databasePasien.find(item => item.fireId === fireId);
-            document.getElementById('popup-title').innerText = p.nama;
-            let html = `
-                <div class="space-y-6">
-                    <div class="flex border border-white/10 rounded-2xl overflow-hidden p-1 bg-white/5">
-                        <button onclick="window.toggleVisite('${fireId}', false)" class="flex-1 py-4 font-bold rounded-xl ${!p.sudahVisite ? 'bg-red-600 shadow-lg' : 'text-slate-500'}">BELUM VISITE</button>
-                        <button onclick="window.toggleVisite('${fireId}', true)" class="flex-1 py-4 font-bold rounded-xl ${p.sudahVisite ? 'bg-green-600 shadow-lg' : 'text-slate-500'}">SUDAH VISITE</button>
-                    </div>
-                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
-                        <p class="text-[10px] font-black text-emerald-400 mb-2 uppercase tracking-widest">Update Diagnosa</p>
-                        <input type="text" id="edit-diagnosa" class="w-full p-4 rounded-xl text-sm font-bold bg-black/40 border border-white/10" value="${p.diagnosa}">
-                    </div>
-                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
-                        <p class="text-[10px] font-black text-fuchsia-400 mb-4 uppercase tracking-widest">Daily Tasks</p>
-                        <div class="flex gap-2 mb-4">
-                            <input type="text" id="task-in" class="flex-1 p-3 rounded-xl text-sm bg-black/20" placeholder="Tugas baru...">
-                            <button onclick="window.addTask('${fireId}')" class="px-5 bg-fuchsia-600 rounded-xl font-bold">+</button>
-                        </div>
-                        <div class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
-                            ${(p.tasks || []).map((t, i) => `
-                                <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5">
-                                    <div class="flex items-center gap-3">
-                                        <input type="checkbox" ${t.done?'checked':''} onchange="window.toggleTask('${fireId}', ${i})" class="w-4 h-4 accent-green-500">
-                                        <span class="text-sm ${t.done?'line-through text-slate-500':'text-slate-200'}">${t.text}</span>
-                                    </div>
-                                    <button onclick="window.delTask('${fireId}', ${i})" class="text-red-500 text-xs">✕</button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <div class="bg-white/5 p-6 rounded-3xl">
-                        <p class="text-[10px] font-black text-cyan-400 mb-2 uppercase tracking-widest">Catatan Medis</p>
-                        <textarea id="edit-catatan" class="w-full h-20 p-4 rounded-xl text-sm bg-black/20">${p.catatan || ''}</textarea>
-                    </div>
-                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
-                        <p class="text-[10px] font-black text-indigo-400 mb-4 uppercase tracking-widest">Manajemen DPJP</p>
-                        <div class="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar bg-black/20 p-3 rounded-xl">
-                            ${daftarDokter.map(d => `
-                                <label class="flex items-center p-2 bg-white/5 rounded-lg cursor-pointer">
-                                    <input type="checkbox" value="${d}" ${ (p.dpjp || []).includes(d) ? 'checked' : ''} class="edit-dpjp-check w-4 h-4 mr-3 accent-indigo-500">
-                                    <span class="text-[11px] font-bold text-slate-300">${d}</span>
-                                </label>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <div class="pt-2">
-                        <button onclick="window.saveEdit('${fireId}')" class="w-full py-5 bg-cyan-600 rounded-2xl font-bold text-white shadow-xl mb-4">SIMPAN SEMUA PERUBAHAN</button>
-                        <button onclick="window.hapusPasien('${fireId}')" class="w-full py-2 text-red-500 text-[10px] font-black uppercase tracking-widest">Hapus Pasien Dari Sistem</button>
-                    </div>
-                </div>`;
-            document.getElementById('modal-content').innerHTML = html;
-            window.openPopup();
+        function saveEdit(id) { 
+            const updates = {};
+            updates[`pasien/${id}/catatan`] = document.getElementById('edit-catatan').value; 
+            updates[`pasien/${id}/diagnosa`] = document.getElementById('edit-diagnosa').value;
+            updates[`pasien/${id}/dpjp`] = Array.from(document.querySelectorAll('.edit-dpjp-check:checked')).map(cb => cb.value);
+            window.dbUpdate(window.dbRef(window.db), updates);
+            closePopup(); 
         }
 
-        window.toggleVisite = function(fireId, status) { update(ref(db, `pasien/${fireId}`), { sudahVisite: status }); }
-        window.addTask = function(fireId) { 
-            const p = databasePasien.find(x => x.fireId === fireId);
-            const tasks = p.tasks || [];
-            const v = document.getElementById('task-in').value;
-            if(v) { tasks.push({text:v, done:false}); update(ref(db, `pasien/${fireId}`), { tasks: tasks }); }
+        function toggleVisite(id, status) { window.dbUpdate(window.dbRef(window.db, `pasien/${id}`), { sudahVisite: status }); }
+        
+        function addTask(id) { 
+            const v = document.getElementById('task-in').value; 
+            if(v) { 
+                const p = databasePasien.find(p => p.id === id);
+                const t = p.tasks || [];
+                t.push({text:v, done:false});
+                window.dbUpdate(window.dbRef(window.db, `pasien/${id}`), { tasks: t });
+                openEditPasien(id);
+            } 
         }
-        window.toggleTask = function(fireId, i) {
-            const p = databasePasien.find(x => x.fireId === fireId);
+
+        function toggleTask(id, i) {
+            const p = databasePasien.find(p => p.id === id);
             p.tasks[i].done = !p.tasks[i].done;
-            update(ref(db, `pasien/${fireId}`), { tasks: p.tasks });
+            window.dbUpdate(window.dbRef(window.db, `pasien/${id}`), { tasks: p.tasks });
         }
-        window.delTask = function(fireId, i) {
-            const p = databasePasien.find(x => x.fireId === fireId);
+
+        function delTask(id, i) {
+            const p = databasePasien.find(p => p.id === id);
             p.tasks.splice(i,1);
-            update(ref(db, `pasien/${fireId}`), { tasks: p.tasks });
+            window.dbUpdate(window.dbRef(window.db, `pasien/${id}`), { tasks: p.tasks });
+            openEditPasien(id);
         }
-        window.saveEdit = function(fireId) {
-            const updates = {
-                catatan: document.getElementById('edit-catatan').value,
-                diagnosa: document.getElementById('edit-diagnosa').value,
-                dpjp: Array.from(document.querySelectorAll('.edit-dpjp-check:checked')).map(cb => cb.value)
-            };
-            update(ref(db, `pasien/${fireId}`), updates);
-            window.closePopup();
-        }
-        window.hapusPasien = function(fireId) { if(confirm('Hapus pasien ini?')) { remove(ref(db, `pasien/${fireId}`)); window.closePopup(); } }
 
-        window.openMgmtDokter = function() {
+        function hapusPasien(id) { if(confirm('Hapus permanen?')) { window.dbRemove(window.dbRef(window.db, `pasien/${id}`)); closePopup(); } }
+
+        function addDokter() { 
+            const v = document.getElementById('new-doc').value; 
+            if(v) { 
+                const newKey = Date.now();
+                window.dbSet(window.dbRef(window.db, 'dokter/' + newKey), v);
+                openMgmtDokter(); 
+            } 
+        }
+
+        function removeDokter(key) { 
+            const dokterKeys = [];
+            window.dbOnValue(window.dbRef(window.db, 'dokter'), (snap) => {
+                const data = snap.val();
+                for(let k in data) if(data[k] === key) window.dbRemove(window.dbRef(window.db, 'dokter/'+k));
+            }, {onlyOnce: true});
+            openMgmtDokter();
+        }
+
+        // --- 6. UI FORMS ---
+        function openInputPasien() {
+            document.getElementById('popup-title').innerText = "Register Pasien";
+            const tersedia = masterRuangan.filter(r => !databasePasien.map(p => p.ruang).includes(r));
+            let html = `<form onsubmit="savePasien(event)" class="space-y-4">
+                <input type="text" id="p-nama" class="w-full p-4 rounded-2xl font-bold" placeholder="NAMA LENGKAP" required>
+                <div class="grid grid-cols-2 gap-4">
+                    <select id="p-ruang" class="p-4 rounded-2xl font-bold" required>${tersedia.map(r => `<option value="${r}">${r}</option>`).join('')}</select>
+                    <input type="number" id="p-umur" class="p-4 rounded-2xl font-bold" placeholder="UMUR" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <select id="p-penjamin" class="p-4 rounded-2xl font-bold"><option>BPJS</option><option>POLRI</option><option>UMUM</option><option>ASURANSI</option></select>
+                    <input type="text" id="p-diagnosa" class="p-4 rounded-2xl font-bold" placeholder="DIAGNOSA" required>
+                </div>
+                <div class="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                    ${daftarDokter.map(d => `<label class="flex items-center p-3 bg-white/5 rounded-xl cursor-pointer"><input type="checkbox" value="${d}" class="p-input-doc w-5 h-5 mr-3 accent-indigo-500"><span class="text-xs font-bold text-slate-300">${d}</span></label>`).join('')}
+                </div>
+                <button type="submit" class="w-full py-5 bg-indigo-600 rounded-2xl font-header font-bold text-white shadow-xl">DAFTARKAN PASIEN</button>
+            </form>`;
+            document.getElementById('modal-content').innerHTML = html; openPopup();
+        }
+
+        function openEditPasien(id) {
+            const p = databasePasien.find(item => item.id === id);
+            document.getElementById('popup-title').innerText = p.nama;
+            let html = `<div class="space-y-6">
+                <div class="flex border border-white/10 rounded-2xl overflow-hidden p-1 bg-white/5">
+                    <button onclick="toggleVisite(${id}, false)" class="flex-1 py-4 font-bold rounded-xl ${!p.sudahVisite ? 'bg-red-600 shadow-lg' : 'text-slate-500'}">BELUM VISITE</button>
+                    <button onclick="toggleVisite(${id}, true)" class="flex-1 py-4 font-bold rounded-xl ${p.sudahVisite ? 'bg-green-600 shadow-lg' : 'text-slate-500'}">SUDAH VISITE</button>
+                </div>
+                <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+                    <p class="text-[10px] font-black text-emerald-400 mb-2 uppercase tracking-widest">Update Diagnosa</p>
+                    <input type="text" id="edit-diagnosa" class="w-full p-4 rounded-xl text-sm font-bold bg-black/40 border border-white/10 focus:border-emerald-500 outline-none" value="${p.diagnosa}">
+                </div>
+                <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+                    <p class="text-[10px] font-black text-fuchsia-400 mb-4 uppercase tracking-widest">Daily Tasks</p>
+                    <div class="flex gap-2 mb-4"><input type="text" id="task-in" class="flex-1 p-3 rounded-xl text-sm bg-black/20" placeholder="Tugas baru..."><button onclick="addTask(${id})" class="px-5 bg-fuchsia-600 rounded-xl font-bold">+</button></div>
+                    <div class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">${(p.tasks || []).map((t, i) => `<div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5"><div class="flex items-center gap-3"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${id}, ${i})" class="w-4 h-4 accent-green-500"><span class="text-sm ${t.done?'line-through text-slate-500':'text-slate-200'}">${t.text}</span></div><button onclick="delTask(${id}, ${i})" class="text-red-500 text-xs">✕</button></div>`).join('')}</div>
+                </div>
+                <div class="bg-white/5 p-6 rounded-3xl"><p class="text-[10px] font-black text-cyan-400 mb-2 uppercase tracking-widest">Catatan Medis</p><textarea id="edit-catatan" class="w-full h-20 p-4 rounded-xl text-sm bg-black/20 outline-none border border-white/5 focus:border-cyan-500">${p.catatan || ''}</textarea></div>
+                <div class="bg-white/5 p-6 rounded-3xl border border-white/10"><p class="text-[10px] font-black text-indigo-400 mb-4 uppercase tracking-widest">Manajemen DPJP</p><div class="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto bg-black/20 p-3 rounded-xl">${daftarDokter.map(d => `<label class="flex items-center p-2 bg-white/5 rounded-lg cursor-pointer"><input type="checkbox" value="${d}" ${(p.dpjp || []).includes(d) ? 'checked' : ''} class="edit-dpjp-check w-4 h-4 mr-3 accent-indigo-500"><span class="text-[11px] font-bold text-slate-300">${d}</span></label>`).join('')}</div></div>
+                <div class="pt-2"><button onclick="saveEdit(${id})" class="w-full py-5 bg-cyan-600 rounded-2xl font-bold text-white shadow-xl hover:bg-cyan-500 mb-4">SIMPAN PERUBAHAN</button><button onclick="hapusPasien(${id})" class="w-full py-2 text-red-500 text-[10px] font-black uppercase tracking-widest">Hapus Pasien</button></div>
+            </div>`;
+            document.getElementById('modal-content').innerHTML = html; openPopup();
+        }
+
+        function openMgmtDokter() {
             document.getElementById('popup-title').innerText = "Database Dokter";
-            let html = `
-                <div class="space-y-4">
-                    <div class="flex gap-2">
-                        <input type="text" id="new-doc" class="flex-1 p-4 rounded-xl font-bold" placeholder="Nama & Gelar">
-                        <button onclick="window.addDokter()" class="px-6 bg-indigo-600 rounded-xl font-bold shadow-lg">+</button>
-                    </div>
-                    <div class="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
-                        ${daftarDokter.map((d, i) => `
-                            <div class="p-4 bg-white/5 rounded-xl border border-white/5 flex justify-between items-center group">
-                                <div class="flex items-center gap-3">
-                                    <i class="fa-solid ${getSpec(d).icon} ${getSpec(d).color} text-xs"></i>
-                                    <span class="font-bold">${d}</span>
-                                </div>
-                                <button onclick="window.removeDokter(${i})" class="text-red-500 opacity-0 group-hover:opacity-100 transition-all">Hapus</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>`;
-            document.getElementById('modal-content').innerHTML = html; window.openPopup();
+            let html = `<div class="space-y-4">
+                <div class="flex gap-2"><input type="text" id="new-doc" class="flex-1 p-4 rounded-xl font-bold" placeholder="Nama & Gelar"><button onclick="addDokter()" class="px-6 bg-indigo-600 rounded-xl font-bold shadow-lg">+</button></div>
+                <div class="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">${daftarDokter.map((d, i) => `<div class="p-4 bg-white/5 rounded-xl border border-white/5 flex justify-between items-center group"><div class="flex items-center gap-3"><i class="fa-solid ${getSpec(d).icon} ${getSpec(d).color} text-xs"></i><span class="font-bold">${d}</span></div><button onclick="removeDokter('${d}')" class="text-red-500 opacity-0 group-hover:opacity-100">Hapus</button></div>`).join('')}</div>
+            </div>`;
+            document.getElementById('modal-content').innerHTML = html; openPopup();
         }
-        window.addDokter = function() { const v = document.getElementById('new-doc').value; if(v) { daftarDokter.push(v); set(ref(db, 'dokter'), daftarDokter); window.openMgmtDokter(); } }
-        window.removeDokter = function(i) { daftarDokter.splice(i, 1); set(ref(db, 'dokter'), daftarDokter); window.openMgmtDokter(); }
 
-        // --- 5. TOOLS & MODES ---
+        // --- 7. MODES & TOOLS ---
         let isTVMode = false;
-        window.toggleTVMode = function() {
+        function toggleTVMode() {
             isTVMode = !isTVMode;
             document.querySelector('aside').classList.toggle('hidden');
             document.querySelector('header').classList.toggle('hidden');
@@ -396,41 +378,25 @@
             document.getElementById('grid-pasien').classList.toggle('p-10');
             if(isTVMode) {
                 const btn = document.createElement('div');
-                btn.id = "exit-tv"; btn.onclick = window.toggleTVMode;
+                btn.id = "exit-tv"; btn.onclick = toggleTVMode;
                 btn.className = "fixed bottom-8 right-8 w-14 h-14 bg-red-600 rounded-full flex items-center justify-center z-[200] cursor-pointer shadow-2xl animate-bounce";
                 btn.innerHTML = '<i class="fa-solid fa-xmark text-xl text-white"></i>';
                 document.body.appendChild(btn);
-            } else {
-                document.getElementById('exit-tv')?.remove();
-            }
+            } else { document.getElementById('exit-tv')?.remove(); }
         }
 
-        window.openKalkulator = function() {
+        function openKalkulator() {
             document.getElementById('popup-title').innerText = "Drug Calculator";
-            let html = `
-                <div class="space-y-4">
-                    <label>Dosis Diminta (mg/mcg)</label>
-                    <input type="number" id="calc-d" class="w-full p-4 rounded-xl font-bold" oninput="window.doCalc()">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label>Sediaan Tersedia</label><input type="number" id="calc-t" class="w-full p-4 rounded-xl font-bold" oninput="window.doCalc()"></div>
-                        <div><label>Volume (ml)</label><input type="number" id="calc-i" class="w-full p-4 rounded-xl font-bold" oninput="window.doCalc()"></div>
-                    </div>
-                    <div class="p-8 bg-emerald-500/10 rounded-3xl text-center border border-emerald-500/30 mt-6">
-                        <p class="text-[10px] text-emerald-400 font-black tracking-widest mb-2 uppercase">Hasil Ambilan:</p>
-                        <h2 id="calc-res" class="text-5xl font-header font-black text-emerald-400">0 ml</h2>
-                    </div>
-                </div>`;
-            document.getElementById('modal-content').innerHTML = html; window.openPopup();
+            document.getElementById('modal-content').innerHTML = `<div class="space-y-4"><label>Dosis Diminta (mg/mcg)</label><input type="number" id="calc-d" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"><div class="grid grid-cols-2 gap-4"><div><label>Sediaan Tersedia</label><input type="number" id="calc-t" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"></div><div><label>Volume (ml)</label><input type="number" id="calc-i" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"></div></div><div class="p-8 bg-emerald-500/10 rounded-3xl text-center border border-emerald-500/30 mt-6"><p class="text-[10px] text-emerald-400 font-black tracking-widest mb-2 uppercase">Hasil Ambilan:</p><h2 id="calc-res" class="text-5xl font-header font-black text-emerald-400">0 ml</h2></div></div>`;
+            openPopup();
         }
-        window.doCalc = function() {
-            const d = parseFloat(document.getElementById('calc-d').value) || 0;
-            const t = parseFloat(document.getElementById('calc-t').value) || 0;
-            const i = parseFloat(document.getElementById('calc-i').value) || 0;
+        function doCalc() {
+            const d = parseFloat(document.getElementById('calc-d').value) || 0, t = parseFloat(document.getElementById('calc-t').value) || 0, i = parseFloat(document.getElementById('calc-i').value) || 0;
             const res = t > 0 ? (d/t)*i : 0;
             document.getElementById('calc-res').innerText = (res % 1 === 0 ? res : res.toFixed(2)) + " ml";
         }
 
-        window.kirimLaporanWA = function() {
+        function kirimLaporanWA() {
             let text = `*LAPORAN VVIP BHARA DAKSA*%0A📆 ${new Date().toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'})}%0A---------------------------------------%0A`;
             masterRuangan.forEach((ruang, index) => {
                 const p = databasePasien.find(pasien => pasien.ruang === ruang);
