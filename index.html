@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VVIP BHARA DAKSA - COMMAND CENTER v26.5</title>
+    <title>VVIP BHARA DAKSA - COMMAND CENTER v26.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -30,24 +30,70 @@
             border-right-width: 2px;
         }
 
-        .card-vvip { box-shadow: var(--gold-glow); border-color: rgba(251, 191, 36, 0.2); }
-        .card-bd { box-shadow: var(--cyan-glow); border-color: rgba(6, 182, 212, 0.2); }
+        .card-vvip {
+            box-shadow: var(--gold-glow);
+            border-color: rgba(251, 191, 36, 0.2);
+        }
 
-        .patient-card:hover { transform: translateY(-5px); }
-        .not-visite { box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); }
+        .card-bd {
+            box-shadow: var(--cyan-glow);
+            border-color: rgba(6, 182, 212, 0.2);
+        }
+
+        .patient-card:hover { 
+            transform: translateY(-5px); 
+        }
+        .card-vvip:hover { box-shadow: 0 5px 20px rgba(251, 191, 36, 0.6), 0 0 10px rgba(251, 191, 36, 0.4); }
+        .card-bd:hover { box-shadow: 0 5px 20px rgba(6, 182, 212, 0.6), 0 0 10px rgba(6, 182, 212, 0.4); }
+
+        .not-visite { 
+            box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.15); 
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        .card-vvip.not-visite { box-shadow: var(--gold-glow), inset 0 0 20px rgba(239, 68, 68, 0.15); }
+        .card-bd.not-visite { box-shadow: var(--cyan-glow), inset 0 0 20px rgba(239, 68, 68, 0.15); }
         
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.3); border-radius: 10px; }
         input, select, textarea { background: rgba(0,0,0,0.5) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
         label { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; display: block; }
+
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .marquee-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(2, 6, 23, 0.9);
+            backdrop-filter: blur(15px);
+            border-top: 2px solid #06b6d4;
+            padding: 12px 0;
+            z-index: 100;
+            overflow: hidden;
+            display: none; 
+        }
+        .marquee-text {
+            display: inline-block;
+            white-space: nowrap;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 32px;
+            color: #00f2ff;
+            text-transform: uppercase;
+            animation: marquee 25s linear infinite;
+        }
     </style>
 </head>
 <body>
 
-    <aside id="sidebar-ui" class="w-24 glass-panel rounded-[2.5rem] flex flex-col items-center py-10 gap-8">
+    <aside class="w-24 glass-panel rounded-[2.5rem] flex flex-col items-center py-10 gap-8">
         <div class="w-14 h-14 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl rotate-45 flex items-center justify-center cursor-pointer shadow-xl mb-4" onclick="location.reload()">
             <span class="text-white text-xl font-black -rotate-45 font-header">BD</span>
         </div>
+        
         <nav class="flex flex-col gap-8">
             <div onclick="openInputPasien()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
                 <i class="fa-solid fa-user-plus text-2xl text-cyan-400"></i>
@@ -71,21 +117,41 @@
                 <i class="fa-solid fa-user-doctor text-2xl text-fuchsia-400"></i>
                 <p class="text-[8px] font-bold text-fuchsia-400 uppercase mt-1">Dokter</p>
             </div>
+            <div onclick="openRunningTextEditor()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
+                <i class="fa-solid fa-gears text-2xl text-slate-400"></i>
+                <p class="text-[8px] font-bold text-slate-400 uppercase mt-1">TEXT</p>
+            </div>
         </nav>
     </aside>
 
     <div class="flex-1 flex flex-col gap-6">
-        <header id="header-ui" class="h-28 glass-panel rounded-[2.5rem] flex items-center px-12">
+        <header class="h-28 glass-panel rounded-[2.5rem] flex items-center px-12">
             <div>
                 <h1 class="text-4xl font-header font-black text-white uppercase tracking-tighter">VVIP <span class="text-cyan-400">BHARA DAKSA</span></h1>
                 <p class="text-[10px] tracking-[0.8em] text-slate-500 font-bold uppercase mt-1">Daily Ops Control</p>
             </div>
+
+            <div class="flex ml-20 gap-8">
+                <div class="flex flex-col">
+                    <span id="bor-percentage" class="text-3xl font-header font-bold text-emerald-400 leading-none">0%</span>
+                    <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest mt-1">BOR RATE</p>
+                </div>
+                <div class="flex flex-col border-l border-white/10 pl-8">
+                    <span id="bed-count" class="text-3xl font-header font-bold text-white leading-none">0/12</span>
+                    <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest mt-1">OCCUPIED</p>
+                </div>
+            </div>
+
             <div class="ml-auto text-right">
                 <span id="live-clock" class="text-3xl font-header font-bold text-white tracking-widest">00:00:00</span>
                 <p class="text-[9px] text-green-500 font-bold uppercase mt-1">Terminal Active</p>
             </div>
         </header>
         <main id="grid-pasien" class="flex-1 grid grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pr-4 custom-scrollbar content-start pb-20"></main>
+    </div>
+
+    <div id="tv-marquee" class="marquee-container">
+        <div id="marquee-content" class="marquee-text">WELCOME TO BHARA DAKSA COMMAND CENTER - RELIABLE & PROFESIONAL SERVICE</div>
     </div>
 
     <div id="popup-menu" class="fixed left-36 top-10 w-[500px] h-[85vh] glass-panel rounded-[3rem] p-10 z-[150] opacity-0 pointer-events-none transition-all duration-300">
@@ -112,12 +178,20 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        window.db = db; window.dbRef = ref; window.dbSet = set; window.dbUpdate = update; window.dbRemove = remove; window.dbOnValue = onValue;
+
+        window.db = db;
+        window.dbRef = ref;
+        window.dbSet = set;
+        window.dbUpdate = update;
+        window.dbRemove = remove;
+        window.dbOnValue = onValue;
+
         initDataSync();
     </script>
 
     <script>
         const masterRuangan = ["VVIP 01", "VVIP 02", "VVIP 03", "VVIP 04", "BHARA DAKSA 5A", "BHARA DAKSA 5B", "BHARA DAKSA 6A", "BHARA DAKSA 6B", "BHARA DAKSA 7A", "BHARA DAKSA 7B", "BHARA DAKSA 8A", "BHARA DAKSA 8B"];
+        
         const specialistIcons = {
             "SP.BS": { icon: "fa-brain", color: "text-orange-500", label: "BEDAH SARAF" },
             "SP.OT": { icon: "fa-bone", color: "text-slate-200", label: "ORTHOPEDI" },
@@ -135,25 +209,33 @@
 
         let databasePasien = [];
         let daftarDokter = [];
-        let isTVMode = false;
 
         function initDataSync() {
             if (!window.dbOnValue) { setTimeout(initDataSync, 500); return; }
+
             window.dbOnValue(window.dbRef(window.db, 'pasien'), (snapshot) => {
                 const data = snapshot.val();
                 databasePasien = data ? Object.values(data) : [];
                 renderGrid();
             });
+
             window.dbOnValue(window.dbRef(window.db, 'dokter'), (snapshot) => {
                 const data = snapshot.val();
                 daftarDokter = data ? Object.values(data) : ["dr. Budi, Sp.JP", "dr. Ani, Sp.A"];
+            });
+
+            window.dbOnValue(window.dbRef(window.db, 'settings/runningText'), (snapshot) => {
+                const val = snapshot.val();
+                if(val) document.getElementById('marquee-content').innerText = val;
             });
         }
 
         function getSpec(name) {
             if (!name) return specialistIcons.DEFAULT;
             const n = name.toUpperCase();
-            for (let key in specialistIcons) if (n.includes(key)) return specialistIcons[key];
+            for (let key in specialistIcons) {
+                if (n.includes(key)) return specialistIcons[key];
+            }
             return specialistIcons.DEFAULT;
         }
 
@@ -166,85 +248,61 @@
         function renderGrid() {
             const container = document.getElementById('grid-pasien');
             container.innerHTML = '';
-            
-            const count = databasePasien.length;
-            let gridCols = "grid-cols-2 lg:grid-cols-3"; // Normal
-            
-            // LOGIC GRID TV MODE SESUAI REQUEST
-            if(isTVMode) {
-                if (count <= 2) gridCols = "grid-cols-1 max-w-full"; // 1-2 orang: Full lebar memanjang
-                else if (count <= 4) gridCols = "grid-cols-2"; // 4 orang: 2x2
-                else if (count <= 6) gridCols = "grid-cols-3"; // 6 orang: 2x3
-                else gridCols = "grid-cols-4"; // 7+ orang: 4x3 dst
-            }
 
-            container.className = `flex-1 grid ${gridCols} gap-8 overflow-y-auto pr-4 custom-scrollbar content-start pb-20`;
+            // LOGIKA PERHITUNGAN BOR
+            const totalBeds = masterRuangan.length;
+            const occupiedBeds = databasePasien.length;
+            const bor = ((occupiedBeds / totalBeds) * 100).toFixed(1);
+
+            document.getElementById('bor-percentage').innerText = bor + "%";
+            document.getElementById('bed-count').innerText = `${occupiedBeds}/${totalBeds}`;
+            
+            // Dinamis Warna BOR
+            const borEl = document.getElementById('bor-percentage');
+            if (bor > 80) borEl.className = "text-3xl font-header font-bold text-red-500 leading-none";
+            else if (bor > 50) borEl.className = "text-3xl font-header font-bold text-orange-400 leading-none";
+            else borEl.className = "text-3xl font-header font-bold text-emerald-400 leading-none";
 
             const sortedPasien = [...databasePasien].sort((a, b) => masterRuangan.indexOf(a.ruang) - masterRuangan.indexOf(b.ruang));
 
             sortedPasien.forEach(data => {
                 const isElite = data.ruang.includes("VVIP");
                 const pendingTasks = data.tasks ? data.tasks.filter(t => !t.done).length : 0;
-                
-                // Card size adaptif untuk TV Mode 1-2 Pasien
-                const cardPadding = (isTVMode && count <= 2) ? 'p-12' : 'p-8';
-                const nameSize = (isTVMode && count <= 2) ? 'text-6xl' : 'text-2xl';
-                const roomSize = (isTVMode && count <= 2) ? 'text-3xl' : 'text-lg';
-
                 const dpjpHtml = (data.dpjp || []).map(docName => {
                     const s = getSpec(docName);
                     return `
-                        <div class="flex items-center gap-4 mb-2 p-2 rounded-2xl bg-white/[0.03] border border-white/[0.05]">
-                            <div class="w-10 h-10 rounded-lg bg-slate-900/50 flex items-center justify-center">
-                                <i class="fa-solid ${s.icon} ${s.color} text-lg"></i>
+                        <div class="flex items-center gap-2 mb-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.05]">
+                            <div class="w-8 h-8 rounded-lg bg-slate-900/50 flex items-center justify-center">
+                                <i class="fa-solid ${s.icon} ${s.color} text-xs"></i>
                             </div>
                             <div class="flex flex-col">
-                                <span class="${(isTVMode && count <= 2) ? 'text-2xl' : 'text-[17px]'} font-bold text-slate-100 leading-tight">${docName}</span>
-                                <span class="${(isTVMode && count <= 2) ? 'text-sm' : 'text-[11px]'} font-black ${s.color} uppercase tracking-tighter leading-none">${s.label}</span>
+                                <span class="text-[17px] font-bold text-slate-100 leading-tight">${docName}</span>
+                                <span class="text-[11px] font-black ${s.color} uppercase tracking-tighter leading-none">${s.label}</span>
                             </div>
                         </div>`;
                 }).join('');
 
                 const card = document.createElement('div');
-                card.className = `patient-card glass-panel rounded-[3rem] ${cardPadding} border-l-[8px] ${isElite ? 'border-l-amber-500 card-vvip' : 'border-l-cyan-500 card-bd'} ${!data.sudahVisite ? 'not-visite' : ''}`;
+                card.className = `patient-card glass-panel rounded-[3rem] p-8 border-l-[6px] ${isElite ? 'border-l-amber-500 card-vvip' : 'border-l-cyan-500 card-bd'} ${!data.sudahVisite ? 'not-visite' : ''}`;
                 card.onclick = () => openEditPasien(data.id);
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-8">
-                        <div class="px-6 py-2 rounded-xl bg-white/5 border border-white/10 ${roomSize} font-header font-black ${isElite ? 'text-amber-400' : 'text-cyan-400'}">${data.ruang}</div>
-                        <div class="flex items-center gap-4">
-                            ${pendingTasks > 0 ? `<div class="px-4 py-2 bg-red-600 rounded-full animate-pulse flex items-center gap-2 shadow-lg shadow-red-600/20"><i class="fa-solid fa-list-check text-white"></i><span class="font-black text-white">${pendingTasks}</span></div>` : ''}
-                            <div class="px-4 py-2 rounded-full text-[10px] font-black ${data.sudahVisite ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'} uppercase">${data.sudahVisite ? '● Visited' : '○ Not Visited'}</div>
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="px-5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-lg font-header font-black ${isElite ? 'text-amber-400' : 'text-cyan-400'}">${data.ruang}</div>
+                        <div class="flex items-center gap-2">
+                            ${pendingTasks > 0 ? `<div class="px-2.5 py-1 bg-red-600 rounded-full animate-pulse flex items-center gap-1 shadow-lg shadow-red-600/20"><i class="fa-solid fa-list-check text-[10px] text-white"></i><span class="text-[10px] font-black text-white">${pendingTasks}</span></div>` : ''}
+                            <div class="px-3 py-1 rounded-full text-[8px] font-black ${data.sudahVisite ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'} uppercase">${data.sudahVisite ? '● Visited' : '○ Not Visited'}</div>
                         </div>
                     </div>
-                    <div class="mb-6">
-                        <h3 class="${nameSize} font-black text-white uppercase truncate tracking-tighter">${data.nama}</h3>
-                        <p class="${(isTVMode && count <= 2) ? 'text-xl' : 'text-sm'} font-bold text-slate-500 uppercase mt-2">${data.umur} THN • <span class="${isElite ? 'text-amber-500' : 'text-cyan-500'}">${data.penjamin}</span></p>
+                    <div class="mb-4">
+                        <h3 class="text-2xl font-black text-white uppercase truncate tracking-tighter">${data.nama}</h3>
+                        <p class="text-sm font-bold text-slate-500 uppercase mt-1">${data.umur} THN • <span class="${isElite ? 'text-amber-500' : 'text-cyan-500'}">${data.penjamin}</span></p>
                     </div>
-                    <p class="${(isTVMode && count <= 2) ? 'text-2xl' : 'text-md'} font-bold text-slate-200 uppercase mb-6">${data.diagnosa}</p>
-                    <div class="border-t border-white/3 pt-6 flex flex-col">${dpjpHtml}</div>`;
+                    <p class="text-md font-bold text-slate-200 uppercase mb-4">${data.diagnosa}</p>
+                    <div class="border-t border-white/3 pt-4 flex flex-col">${dpjpHtml}</div>`;
                 container.appendChild(card);
             });
         }
 
-        function toggleTVMode() {
-            isTVMode = !isTVMode;
-            document.getElementById('sidebar-ui').classList.toggle('hidden');
-            document.getElementById('header-ui').classList.toggle('hidden');
-            document.body.style.padding = isTVMode ? '2rem' : '1.5rem';
-            
-            if(isTVMode) {
-                const btn = document.createElement('div');
-                btn.id = "exit-tv"; btn.onclick = toggleTVMode;
-                btn.className = "fixed bottom-8 right-8 w-14 h-14 bg-red-600 rounded-full flex items-center justify-center z-[200] cursor-pointer shadow-2xl animate-bounce";
-                btn.innerHTML = '<i class="fa-solid fa-xmark text-xl text-white"></i>';
-                document.body.appendChild(btn);
-            } else {
-                document.getElementById('exit-tv')?.remove();
-            }
-            renderGrid();
-        }
-
-        // --- SISANYA FUNGSI STANDAR (TETAP SAMA) ---
         function savePasien(e) {
             e.preventDefault();
             const id = Date.now();
@@ -310,7 +368,7 @@
                 const data = snap.val();
                 for(let k in data) if(data[k] === key) window.dbRemove(window.dbRef(window.db, 'dokter/'+k));
             }, {onlyOnce: true});
-            setTimeout(openMgmtDokter, 300);
+            openMgmtDokter();
         }
 
         function openInputPasien() {
@@ -367,6 +425,23 @@
             document.getElementById('modal-content').innerHTML = html; openPopup();
         }
 
+        let isTVMode = false;
+        function toggleTVMode() {
+            isTVMode = !isTVMode;
+            document.querySelector('aside').classList.toggle('hidden');
+            document.querySelector('header').classList.toggle('hidden');
+            document.getElementById('tv-marquee').style.display = isTVMode ? 'block' : 'none';
+            document.body.style.padding = isTVMode ? '0' : '1.5rem';
+            document.getElementById('grid-pasien').classList.toggle('p-10');
+            if(isTVMode) {
+                const btn = document.createElement('div');
+                btn.id = "exit-tv"; btn.onclick = toggleTVMode;
+                btn.className = "fixed bottom-24 right-8 w-14 h-14 bg-red-600 rounded-full flex items-center justify-center z-[200] cursor-pointer shadow-2xl animate-bounce";
+                btn.innerHTML = '<i class="fa-solid fa-xmark text-xl text-white"></i>';
+                document.body.appendChild(btn);
+            } else { document.getElementById('exit-tv')?.remove(); }
+        }
+
         function openKalkulator() {
             document.getElementById('popup-title').innerText = "Drug Calculator";
             document.getElementById('modal-content').innerHTML = `<div class="space-y-4"><label>Dosis Diminta (mg/mcg)</label><input type="number" id="calc-d" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"><div class="grid grid-cols-2 gap-4"><div><label>Sediaan Tersedia</label><input type="number" id="calc-t" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"></div><div><label>Volume (ml)</label><input type="number" id="calc-i" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"></div></div><div class="p-8 bg-emerald-500/10 rounded-3xl text-center border border-emerald-500/30 mt-6"><p class="text-[10px] text-emerald-400 font-black tracking-widest mb-2 uppercase">Hasil Ambilan:</p><h2 id="calc-res" class="text-5xl font-header font-black text-emerald-400">0 ml</h2></div></div>`;
@@ -385,6 +460,31 @@
                 text += `${index + 1}. ${ruang}: ${p ? `*${p.nama.toUpperCase()}* (${p.penjamin})` : '_KOSONG_'}%0A`;
             });
             window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        function openRunningTextEditor() {
+            document.getElementById('popup-title').innerText = "Edit Running Text";
+            const currentText = document.getElementById('marquee-content').innerText;
+            let html = `
+                <div class="space-y-6">
+                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+                        <label class="text-cyan-400 mb-2">Pesan Mode TV</label>
+                        <textarea id="new-marquee-text" class="w-full h-32 p-4 rounded-xl font-bold bg-black/40 border border-white/10 outline-none focus:border-cyan-500">${currentText}</textarea>
+                    </div>
+                    <button onclick="saveRunningText()" class="w-full py-5 bg-cyan-600 rounded-2xl font-bold text-white shadow-xl hover:bg-cyan-500">UPDATE RUNNING TEXT</button>
+                    <p class="text-[10px] text-slate-500 text-center uppercase tracking-widest italic">Teks ini akan terupdate secara otomatis di seluruh monitor TV yang aktif.</p>
+                </div>
+            `;
+            document.getElementById('modal-content').innerHTML = html;
+            openPopup();
+        }
+
+        function saveRunningText() {
+            const txt = document.getElementById('new-marquee-text').value;
+            if(txt) {
+                window.dbSet(window.dbRef(window.db, 'settings/runningText'), txt);
+                closePopup();
+            }
         }
     </script>
 </body>
