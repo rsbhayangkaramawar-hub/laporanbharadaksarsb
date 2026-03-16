@@ -30,28 +30,11 @@
             border-right-width: 2px;
         }
 
-        .card-vvip {
-            box-shadow: var(--gold-glow);
-            border-color: rgba(251, 191, 36, 0.2);
-        }
+        .card-vvip { box-shadow: var(--gold-glow); border-color: rgba(251, 191, 36, 0.2); }
+        .card-bd { box-shadow: var(--cyan-glow); border-color: rgba(6, 182, 212, 0.2); }
 
-        .card-bd {
-            box-shadow: var(--cyan-glow);
-            border-color: rgba(6, 182, 212, 0.2);
-        }
-
-        .patient-card:hover { 
-            transform: translateY(-5px); 
-        }
-        .card-vvip:hover { box-shadow: 0 5px 20px rgba(251, 191, 36, 0.6), 0 0 10px rgba(251, 191, 36, 0.4); }
-        .card-bd:hover { box-shadow: 0 5px 20px rgba(6, 182, 212, 0.6), 0 0 10px rgba(6, 182, 212, 0.4); }
-
-        .not-visite { 
-            box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.15); 
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-        .card-vvip.not-visite { box-shadow: var(--gold-glow), inset 0 0 20px rgba(239, 68, 68, 0.15); }
-        .card-bd.not-visite { box-shadow: var(--cyan-glow), inset 0 0 20px rgba(239, 68, 68, 0.15); }
+        .patient-card:hover { transform: translateY(-5px); }
+        .not-visite { box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); }
         
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.3); border-radius: 10px; }
@@ -61,11 +44,10 @@
 </head>
 <body>
 
-    <aside class="w-24 glass-panel rounded-[2.5rem] flex flex-col items-center py-10 gap-8">
+    <aside id="sidebar-ui" class="w-24 glass-panel rounded-[2.5rem] flex flex-col items-center py-10 gap-8">
         <div class="w-14 h-14 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl rotate-45 flex items-center justify-center cursor-pointer shadow-xl mb-4" onclick="location.reload()">
             <span class="text-white text-xl font-black -rotate-45 font-header">BD</span>
         </div>
-        
         <nav class="flex flex-col gap-8">
             <div onclick="openInputPasien()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
                 <i class="fa-solid fa-user-plus text-2xl text-cyan-400"></i>
@@ -93,7 +75,7 @@
     </aside>
 
     <div class="flex-1 flex flex-col gap-6">
-        <header class="h-28 glass-panel rounded-[2.5rem] flex items-center px-12">
+        <header id="header-ui" class="h-28 glass-panel rounded-[2.5rem] flex items-center px-12">
             <div>
                 <h1 class="text-4xl font-header font-black text-white uppercase tracking-tighter">VVIP <span class="text-cyan-400">BHARA DAKSA</span></h1>
                 <p class="text-[10px] tracking-[0.8em] text-slate-500 font-bold uppercase mt-1">Daily Ops Control</p>
@@ -130,23 +112,12 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-
-        // Ekspos ke Global
-        window.db = db;
-        window.dbRef = ref;
-        window.dbSet = set;
-        window.dbUpdate = update;
-        window.dbRemove = remove;
-        window.dbOnValue = onValue;
-
-        // Inisialisasi Sinkronisasi Realtime
+        window.db = db; window.dbRef = ref; window.dbSet = set; window.dbUpdate = update; window.dbRemove = remove; window.dbOnValue = onValue;
         initDataSync();
     </script>
 
     <script>
-        // --- 1. CONFIGURATION ---
         const masterRuangan = ["VVIP 01", "VVIP 02", "VVIP 03", "VVIP 04", "BHARA DAKSA 5A", "BHARA DAKSA 5B", "BHARA DAKSA 6A", "BHARA DAKSA 6B", "BHARA DAKSA 7A", "BHARA DAKSA 7B", "BHARA DAKSA 8A", "BHARA DAKSA 8B"];
-        
         const specialistIcons = {
             "SP.BS": { icon: "fa-brain", color: "text-orange-500", label: "BEDAH SARAF" },
             "SP.OT": { icon: "fa-bone", color: "text-slate-200", label: "ORTHOPEDI" },
@@ -164,32 +135,25 @@
 
         let databasePasien = [];
         let daftarDokter = [];
+        let isTVMode = false;
 
-        // --- 2. FIREBASE SYNC ---
         function initDataSync() {
             if (!window.dbOnValue) { setTimeout(initDataSync, 500); return; }
-
-            // Sync Pasien
             window.dbOnValue(window.dbRef(window.db, 'pasien'), (snapshot) => {
                 const data = snapshot.val();
                 databasePasien = data ? Object.values(data) : [];
                 renderGrid();
             });
-
-            // Sync Dokter
             window.dbOnValue(window.dbRef(window.db, 'dokter'), (snapshot) => {
                 const data = snapshot.val();
                 daftarDokter = data ? Object.values(data) : ["dr. Budi, Sp.JP", "dr. Ani, Sp.A"];
             });
         }
 
-        // --- 3. LOGIC HELPERS ---
         function getSpec(name) {
             if (!name) return specialistIcons.DEFAULT;
             const n = name.toUpperCase();
-            for (let key in specialistIcons) {
-                if (n.includes(key)) return specialistIcons[key];
-            }
+            for (let key in specialistIcons) if (n.includes(key)) return specialistIcons[key];
             return specialistIcons.DEFAULT;
         }
 
@@ -199,51 +163,88 @@
         function closePopup() { document.getElementById('popup-menu').style.opacity = '0'; document.getElementById('popup-menu').style.pointerEvents = 'none'; }
         function openPopup() { document.getElementById('popup-menu').style.opacity = '1'; document.getElementById('popup-menu').style.pointerEvents = 'auto'; }
 
-        // --- 4. RENDERER ---
         function renderGrid() {
             const container = document.getElementById('grid-pasien');
             container.innerHTML = '';
+            
+            const count = databasePasien.length;
+            let gridCols = "grid-cols-2 lg:grid-cols-3"; // Normal
+            
+            // LOGIC GRID TV MODE SESUAI REQUEST
+            if(isTVMode) {
+                if (count <= 2) gridCols = "grid-cols-1 max-w-full"; // 1-2 orang: Full lebar memanjang
+                else if (count <= 4) gridCols = "grid-cols-2"; // 4 orang: 2x2
+                else if (count <= 6) gridCols = "grid-cols-3"; // 6 orang: 2x3
+                else gridCols = "grid-cols-4"; // 7+ orang: 4x3 dst
+            }
+
+            container.className = `flex-1 grid ${gridCols} gap-8 overflow-y-auto pr-4 custom-scrollbar content-start pb-20`;
+
             const sortedPasien = [...databasePasien].sort((a, b) => masterRuangan.indexOf(a.ruang) - masterRuangan.indexOf(b.ruang));
 
             sortedPasien.forEach(data => {
                 const isElite = data.ruang.includes("VVIP");
                 const pendingTasks = data.tasks ? data.tasks.filter(t => !t.done).length : 0;
+                
+                // Card size adaptif untuk TV Mode 1-2 Pasien
+                const cardPadding = (isTVMode && count <= 2) ? 'p-12' : 'p-8';
+                const nameSize = (isTVMode && count <= 2) ? 'text-6xl' : 'text-2xl';
+                const roomSize = (isTVMode && count <= 2) ? 'text-3xl' : 'text-lg';
+
                 const dpjpHtml = (data.dpjp || []).map(docName => {
                     const s = getSpec(docName);
                     return `
-                        <div class="flex items-center gap-2 mb-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-                            <div class="w-8 h-8 rounded-lg bg-slate-900/50 flex items-center justify-center">
-                                <i class="fa-solid ${s.icon} ${s.color} text-xs"></i>
+                        <div class="flex items-center gap-4 mb-2 p-2 rounded-2xl bg-white/[0.03] border border-white/[0.05]">
+                            <div class="w-10 h-10 rounded-lg bg-slate-900/50 flex items-center justify-center">
+                                <i class="fa-solid ${s.icon} ${s.color} text-lg"></i>
                             </div>
                             <div class="flex flex-col">
-                                <span class="text-[17px] font-bold text-slate-100 leading-tight">${docName}</span>
-                                <span class="text-[11px] font-black ${s.color} uppercase tracking-tighter leading-none">${s.label}</span>
+                                <span class="${(isTVMode && count <= 2) ? 'text-2xl' : 'text-[17px]'} font-bold text-slate-100 leading-tight">${docName}</span>
+                                <span class="${(isTVMode && count <= 2) ? 'text-sm' : 'text-[11px]'} font-black ${s.color} uppercase tracking-tighter leading-none">${s.label}</span>
                             </div>
                         </div>`;
                 }).join('');
 
                 const card = document.createElement('div');
-                card.className = `patient-card glass-panel rounded-[3rem] p-8 border-l-[6px] ${isElite ? 'border-l-amber-500 card-vvip' : 'border-l-cyan-500 card-bd'} ${!data.sudahVisite ? 'not-visite' : ''}`;
+                card.className = `patient-card glass-panel rounded-[3rem] ${cardPadding} border-l-[8px] ${isElite ? 'border-l-amber-500 card-vvip' : 'border-l-cyan-500 card-bd'} ${!data.sudahVisite ? 'not-visite' : ''}`;
                 card.onclick = () => openEditPasien(data.id);
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-6">
-                        <div class="px-5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-lg font-header font-black ${isElite ? 'text-amber-400' : 'text-cyan-400'}">${data.ruang}</div>
-                        <div class="flex items-center gap-2">
-                            ${pendingTasks > 0 ? `<div class="px-2.5 py-1 bg-red-600 rounded-full animate-pulse flex items-center gap-1 shadow-lg shadow-red-600/20"><i class="fa-solid fa-list-check text-[10px] text-white"></i><span class="text-[10px] font-black text-white">${pendingTasks}</span></div>` : ''}
-                            <div class="px-3 py-1 rounded-full text-[8px] font-black ${data.sudahVisite ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'} uppercase">${data.sudahVisite ? '● Visited' : '○ Not Visited'}</div>
+                    <div class="flex justify-between items-start mb-8">
+                        <div class="px-6 py-2 rounded-xl bg-white/5 border border-white/10 ${roomSize} font-header font-black ${isElite ? 'text-amber-400' : 'text-cyan-400'}">${data.ruang}</div>
+                        <div class="flex items-center gap-4">
+                            ${pendingTasks > 0 ? `<div class="px-4 py-2 bg-red-600 rounded-full animate-pulse flex items-center gap-2 shadow-lg shadow-red-600/20"><i class="fa-solid fa-list-check text-white"></i><span class="font-black text-white">${pendingTasks}</span></div>` : ''}
+                            <div class="px-4 py-2 rounded-full text-[10px] font-black ${data.sudahVisite ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'} uppercase">${data.sudahVisite ? '● Visited' : '○ Not Visited'}</div>
                         </div>
                     </div>
-                    <div class="mb-4">
-                        <h3 class="text-2xl font-black text-white uppercase truncate tracking-tighter">${data.nama}</h3>
-                        <p class="text-sm font-bold text-slate-500 uppercase mt-1">${data.umur} THN • <span class="${isElite ? 'text-amber-500' : 'text-cyan-500'}">${data.penjamin}</span></p>
+                    <div class="mb-6">
+                        <h3 class="${nameSize} font-black text-white uppercase truncate tracking-tighter">${data.nama}</h3>
+                        <p class="${(isTVMode && count <= 2) ? 'text-xl' : 'text-sm'} font-bold text-slate-500 uppercase mt-2">${data.umur} THN • <span class="${isElite ? 'text-amber-500' : 'text-cyan-500'}">${data.penjamin}</span></p>
                     </div>
-                    <p class="text-md font-bold text-slate-200 uppercase mb-4">${data.diagnosa}</p>
-                    <div class="border-t border-white/3 pt-4 flex flex-col">${dpjpHtml}</div>`;
+                    <p class="${(isTVMode && count <= 2) ? 'text-2xl' : 'text-md'} font-bold text-slate-200 uppercase mb-6">${data.diagnosa}</p>
+                    <div class="border-t border-white/3 pt-6 flex flex-col">${dpjpHtml}</div>`;
                 container.appendChild(card);
             });
         }
 
-        // --- 5. ACTIONS ---
+        function toggleTVMode() {
+            isTVMode = !isTVMode;
+            document.getElementById('sidebar-ui').classList.toggle('hidden');
+            document.getElementById('header-ui').classList.toggle('hidden');
+            document.body.style.padding = isTVMode ? '2rem' : '1.5rem';
+            
+            if(isTVMode) {
+                const btn = document.createElement('div');
+                btn.id = "exit-tv"; btn.onclick = toggleTVMode;
+                btn.className = "fixed bottom-8 right-8 w-14 h-14 bg-red-600 rounded-full flex items-center justify-center z-[200] cursor-pointer shadow-2xl animate-bounce";
+                btn.innerHTML = '<i class="fa-solid fa-xmark text-xl text-white"></i>';
+                document.body.appendChild(btn);
+            } else {
+                document.getElementById('exit-tv')?.remove();
+            }
+            renderGrid();
+        }
+
+        // --- SISANYA FUNGSI STANDAR (TETAP SAMA) ---
         function savePasien(e) {
             e.preventDefault();
             const id = Date.now();
@@ -305,15 +306,13 @@
         }
 
         function removeDokter(key) { 
-            const dokterKeys = [];
             window.dbOnValue(window.dbRef(window.db, 'dokter'), (snap) => {
                 const data = snap.val();
                 for(let k in data) if(data[k] === key) window.dbRemove(window.dbRef(window.db, 'dokter/'+k));
             }, {onlyOnce: true});
-            openMgmtDokter();
+            setTimeout(openMgmtDokter, 300);
         }
 
-        // --- 6. UI FORMS ---
         function openInputPasien() {
             document.getElementById('popup-title').innerText = "Register Pasien";
             const tersedia = masterRuangan.filter(r => !databasePasien.map(p => p.ruang).includes(r));
@@ -366,23 +365,6 @@
                 <div class="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">${daftarDokter.map((d, i) => `<div class="p-4 bg-white/5 rounded-xl border border-white/5 flex justify-between items-center group"><div class="flex items-center gap-3"><i class="fa-solid ${getSpec(d).icon} ${getSpec(d).color} text-xs"></i><span class="font-bold">${d}</span></div><button onclick="removeDokter('${d}')" class="text-red-500 opacity-0 group-hover:opacity-100">Hapus</button></div>`).join('')}</div>
             </div>`;
             document.getElementById('modal-content').innerHTML = html; openPopup();
-        }
-
-        // --- 7. MODES & TOOLS ---
-        let isTVMode = false;
-        function toggleTVMode() {
-            isTVMode = !isTVMode;
-            document.querySelector('aside').classList.toggle('hidden');
-            document.querySelector('header').classList.toggle('hidden');
-            document.body.style.padding = isTVMode ? '0' : '1.5rem';
-            document.getElementById('grid-pasien').classList.toggle('p-10');
-            if(isTVMode) {
-                const btn = document.createElement('div');
-                btn.id = "exit-tv"; btn.onclick = toggleTVMode;
-                btn.className = "fixed bottom-8 right-8 w-14 h-14 bg-red-600 rounded-full flex items-center justify-center z-[200] cursor-pointer shadow-2xl animate-bounce";
-                btn.innerHTML = '<i class="fa-solid fa-xmark text-xl text-white"></i>';
-                document.body.appendChild(btn);
-            } else { document.getElementById('exit-tv')?.remove(); }
         }
 
         function openKalkulator() {
