@@ -85,6 +85,15 @@
             text-transform: uppercase;
             animation: marquee 25s linear infinite;
         }
+
+        /* Fade Animation for TV Slide */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -209,6 +218,12 @@
 
         let databasePasien = [];
         let daftarDokter = [];
+        
+        // TV MODE PAGINATION GLOBALS
+        let isTVMode = false;
+        let tvPageIndex = 0;
+        let tvInterval = null;
+        const MAX_PASIEN_TV = 2;
 
         function initDataSync() {
             if (!window.dbOnValue) { setTimeout(initDataSync, 500); return; }
@@ -249,7 +264,6 @@
             const container = document.getElementById('grid-pasien');
             container.innerHTML = '';
 
-            // LOGIKA PERHITUNGAN BOR
             const totalBeds = masterRuangan.length;
             const occupiedBeds = databasePasien.length;
             const bor = ((occupiedBeds / totalBeds) * 100).toFixed(1);
@@ -257,15 +271,20 @@
             document.getElementById('bor-percentage').innerText = bor + "%";
             document.getElementById('bed-count').innerText = `${occupiedBeds}/${totalBeds}`;
             
-            // Dinamis Warna BOR
             const borEl = document.getElementById('bor-percentage');
             if (bor > 80) borEl.className = "text-3xl font-header font-bold text-red-500 leading-none";
             else if (bor > 50) borEl.className = "text-3xl font-header font-bold text-orange-400 leading-none";
             else borEl.className = "text-3xl font-header font-bold text-emerald-400 leading-none";
 
-            const sortedPasien = [...databasePasien].sort((a, b) => masterRuangan.indexOf(a.ruang) - masterRuangan.indexOf(b.ruang));
+            let displayData = [...databasePasien].sort((a, b) => masterRuangan.indexOf(a.ruang) - masterRuangan.indexOf(b.ruang));
 
-            sortedPasien.forEach(data => {
+            // LOGIKA PAGINATION TV
+            if (isTVMode && displayData.length > MAX_PASIEN_TV) {
+                const start = tvPageIndex * MAX_PASIEN_TV;
+                displayData = displayData.slice(start, start + MAX_PASIEN_TV);
+            }
+
+            displayData.forEach(data => {
                 const isElite = data.ruang.includes("VVIP");
                 const pendingTasks = data.tasks ? data.tasks.filter(t => !t.done).length : 0;
                 const dpjpHtml = (data.dpjp || []).map(docName => {
@@ -276,25 +295,25 @@
                                 <i class="fa-solid ${s.icon} ${s.color} text-xs"></i>
                             </div>
                             <div class="flex flex-col">
-                                <span class="text-[17px] font-bold text-slate-100 leading-tight">${docName}</span>
-                                <span class="text-[11px] font-black ${s.color} uppercase tracking-tighter leading-none">${s.label}</span>
+                                <span class="text-[20px] font-bold text-slate-100 leading-tight">${docName}</span>
+                                <span class="text-[12px] font-black ${s.color} uppercase tracking-tighter leading-none">${s.label}</span>
                             </div>
                         </div>`;
                 }).join('');
 
                 const card = document.createElement('div');
-                card.className = `patient-card glass-panel rounded-[3rem] p-8 border-l-[6px] ${isElite ? 'border-l-amber-500 card-vvip' : 'border-l-cyan-500 card-bd'} ${!data.sudahVisite ? 'not-visite' : ''}`;
+                card.className = `patient-card fade-in glass-panel rounded-[3rem] p-8 border-l-[6px] ${isElite ? 'border-l-amber-500 card-vvip' : 'border-l-cyan-500 card-bd'} ${!data.sudahVisite ? 'not-visite' : ''}`;
                 card.onclick = () => openEditPasien(data.id);
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-6">
-                        <div class="px-5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-lg font-header font-black ${isElite ? 'text-amber-400' : 'text-cyan-400'}">${data.ruang}</div>
+                    <div class="px-5 py-1.5 rounded-xl bg-white/5 border border-white/10 ${isTVMode ? 'text-4xl' : 'text-lg'} font-header font-black ${isElite ? 'text-amber-400' : 'text-cyan-400'}">${data.ruang}</div>
                         <div class="flex items-center gap-2">
                             ${pendingTasks > 0 ? `<div class="px-2.5 py-1 bg-red-600 rounded-full animate-pulse flex items-center gap-1 shadow-lg shadow-red-600/20"><i class="fa-solid fa-list-check text-[10px] text-white"></i><span class="text-[10px] font-black text-white">${pendingTasks}</span></div>` : ''}
                             <div class="px-3 py-1 rounded-full text-[8px] font-black ${data.sudahVisite ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'} uppercase">${data.sudahVisite ? '● Visited' : '○ Not Visited'}</div>
                         </div>
                     </div>
                     <div class="mb-4">
-                        <h3 class="text-2xl font-black text-white uppercase truncate tracking-tighter">${data.nama}</h3>
+                        <h3 class="text-3xl font-black text-white uppercase truncate tracking-tighter">${data.nama}</h3>
                         <p class="text-sm font-bold text-slate-500 uppercase mt-1">${data.umur} THN • <span class="${isElite ? 'text-amber-500' : 'text-cyan-500'}">${data.penjamin}</span></p>
                     </div>
                     <p class="text-md font-bold text-slate-200 uppercase mb-4">${data.diagnosa}</p>
@@ -425,21 +444,42 @@
             document.getElementById('modal-content').innerHTML = html; openPopup();
         }
 
-        let isTVMode = false;
         function toggleTVMode() {
             isTVMode = !isTVMode;
+            tvPageIndex = 0;
+            if (tvInterval) clearInterval(tvInterval);
+
+            if (isTVMode) {
+                tvInterval = setInterval(() => {
+                    const totalPages = Math.ceil(databasePasien.length / MAX_PASIEN_TV);
+                    if (totalPages > 1) {
+                        tvPageIndex = (tvPageIndex + 1) % totalPages;
+                        renderGrid();
+                    }
+                }, 10000);
+            }
+
             document.querySelector('aside').classList.toggle('hidden');
             document.querySelector('header').classList.toggle('hidden');
             document.getElementById('tv-marquee').style.display = isTVMode ? 'block' : 'none';
             document.body.style.padding = isTVMode ? '0' : '1.5rem';
-            document.getElementById('grid-pasien').classList.toggle('p-10');
+            
+            const grid = document.getElementById('grid-pasien');
             if(isTVMode) {
+                grid.classList.replace('lg:grid-cols-3', 'grid-cols-1');
+                grid.classList.add('p-10', 'place-content-center');
+                
                 const btn = document.createElement('div');
                 btn.id = "exit-tv"; btn.onclick = toggleTVMode;
                 btn.className = "fixed bottom-24 right-8 w-14 h-14 bg-red-600 rounded-full flex items-center justify-center z-[200] cursor-pointer shadow-2xl animate-bounce";
                 btn.innerHTML = '<i class="fa-solid fa-xmark text-xl text-white"></i>';
                 document.body.appendChild(btn);
-            } else { document.getElementById('exit-tv')?.remove(); }
+            } else { 
+                grid.classList.replace('grid-cols-1', 'lg:grid-cols-3');
+                grid.classList.remove('p-10', 'place-content-center');
+                document.getElementById('exit-tv')?.remove(); 
+            }
+            renderGrid();
         }
 
         function openKalkulator() {
