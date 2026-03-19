@@ -221,7 +221,7 @@
         let isTVMode = false;
         let tvPageIndex = 0;
         let tvInterval = null;
-        const MAX_PASIEN_TV = 4;
+        const MAX_PASIEN_TV = 4; // Berubah menjadi 4 grid
 
         function initDataSync() {
             if (!window.dbOnValue) { setTimeout(initDataSync, 500); return; }
@@ -291,13 +291,13 @@
                 const dpjpHtml = (data.dpjp || []).map(docName => {
                     const s = getSpec(docName);
                     return `
-                        <div class="flex items-center gap-4 mb-2 p-2 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-                            <div class="${isTVMode ? 'w-16 h-16' : 'w-8 h-8'} rounded-lg bg-slate-900/50 flex items-center justify-center">
-                                <i class="fa-solid ${s.icon} ${s.color} ${isTVMode ? 'text-5xl' : 'text-xs'}"></i>
+                        <div class="flex items-center gap-2 mb-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.05]">
+                            <div class="w-8 h-8 rounded-lg bg-slate-900/50 flex items-center justify-center">
+                                <i class="fa-solid ${s.icon} ${s.color} text-3xl"></i>
                             </div>
                             <div class="flex flex-col">
-                                <span class="${isTVMode ? 'text-3xl' : 'text-[20px]'} font-bold text-slate-100 leading-tight">${docName}</span>
-                                <span class="${isTVMode ? 'text-2xl' : 'text-[12px]'} font-black ${s.color} uppercase tracking-tighter leading-none">${s.label}</span>
+                                <span class="${isTVMode ? 'text-[24px]' : 'text-[20px]'} font-bold text-slate-100 leading-tight">${docName}</span>
+                                <span class="text-[12px] font-black ${s.color} uppercase tracking-tighter leading-none">${s.label}</span>
                             </div>
                         </div>`;
                 }).join('');
@@ -318,7 +318,7 @@
                             <h3 class="${isTVMode ? 'text-5xl' : 'text-3xl'} font-black text-white uppercase truncate tracking-tighter">${data.nama}</h3>
                             <p class="${isTVMode ? 'text-xl' : 'text-sm'} font-bold text-slate-500 uppercase mt-1">${data.umur} THN • <span class="${isElite ? 'text-amber-500' : 'text-cyan-500'}">${data.penjamin}</span></p>
                         </div>
-                        <p class="${isTVMode ? 'text-2xl' : 'text-md'} font-bold text-slate-200 uppercase mb-4">${data.diagnosa}</p>
+                        <p class="${isTVMode ? 'text-1xl' : 'text-md'} font-bold text-slate-200 uppercase mb-4">${data.diagnosa}</p>
                     </div>
                     <div class="border-t border-white/3 pt-4 flex flex-col">${dpjpHtml}</div>`;
                 container.appendChild(card);
@@ -493,26 +493,11 @@
 
         function openKalkulator() {
             document.getElementById('popup-title').innerText = "Drug Calculator";
-            document.getElementById('modal-content').innerHTML = `
-                <div class="space-y-4">
-                    <label>Dosis Diminta (mg/mcg)</label>
-                    <input type="number" id="calc-d" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label>Sediaan Tersedia</label><input type="number" id="calc-t" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"></div>
-                        <div><label>Volume (ml)</label><input type="number" id="calc-i" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"></div>
-                    </div>
-                    <div class="p-8 bg-emerald-500/10 rounded-3xl text-center border border-emerald-500/30 mt-6">
-                        <p class="text-[10px] text-emerald-400 font-black tracking-widest mb-2 uppercase">Hasil Ambilan:</p>
-                        <h2 id="calc-res" class="text-5xl font-header font-black text-emerald-400">0 ml</h2>
-                    </div>
-                </div>`;
+            document.getElementById('modal-content').innerHTML = `<div class="space-y-4"><label>Dosis Diminta (mg/mcg)</label><input type="number" id="calc-d" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"><div class="grid grid-cols-2 gap-4"><div><label>Sediaan Tersedia</label><input type="number" id="calc-t" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"></div><div><label>Volume (ml)</label><input type="number" id="calc-i" class="w-full p-4 rounded-xl font-bold" oninput="oninput="doCalc()"></div></div><div class="p-8 bg-emerald-500/10 rounded-3xl text-center border border-emerald-500/30 mt-6"><p class="text-[10px] text-emerald-400 font-black tracking-widest mb-2 uppercase">Hasil Ambilan:</p><h2 id="calc-res" class="text-5xl font-header font-black text-emerald-400">0 ml</h2></div></div>`;
             openPopup();
         }
-
-        window.doCalc = function() {
-            const d = parseFloat(document.getElementById('calc-d').value) || 0;
-            const t = parseFloat(document.getElementById('calc-t').value) || 0;
-            const i = parseFloat(document.getElementById('calc-i').value) || 0;
+        function doCalc() {
+            const d = parseFloat(document.getElementById('calc-d').value) || 0, t = parseFloat(document.getElementById('calc-t').value) || 0, i = parseFloat(document.getElementById('calc-i').value) || 0;
             const res = t > 0 ? (d/t)*i : 0;
             document.getElementById('calc-res').innerText = (res % 1 === 0 ? res : res.toFixed(2)) + " ml";
         }
@@ -529,27 +514,13 @@
         function openRunningTextEditor() {
             document.getElementById('popup-title').innerText = "Edit Running Text";
             const currentText = document.getElementById('marquee-content').innerText;
-            const currentSpeed = parseInt(document.getElementById('marquee-content').style.animationDuration) || 25;
-            let html = `
-                <div class="space-y-6">
-                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
-                        <label>Pesan Teks</label>
-                        <textarea id="new-marquee-text" class="w-full h-24 p-4 rounded-xl text-sm bg-black/40 outline-none border border-white/10 focus:border-cyan-500">${currentText}</textarea>
-                    </div>
-                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
-                        <label>Kecepatan (Detik)</label>
-                        <input type="number" id="new-marquee-speed" class="w-full p-4 rounded-xl font-bold bg-black/40" value="${currentSpeed}">
-                    </div>
-                    <button onclick="saveRunningText()" class="w-full py-5 bg-indigo-600 rounded-2xl font-header font-bold text-white shadow-xl">SIMPAN TEXT</button>
-                </div>`;
-            document.getElementById('modal-content').innerHTML = html; 
-            openPopup();
+            let html = `<div class="space-y-6"><div class="bg-white/5 p-6 rounded-3xl border border-white/10"><label class="text-cyan-400 mb-2">Pesan Mode TV</label><textarea id="new-marquee-text" class="w-full h-32 p-4 rounded-xl font-bold bg-black/40 border border-white/10 outline-none focus:border-cyan-500">${currentText}</textarea></div><button onclick="saveRunningText()" class="w-full py-5 bg-cyan-600 rounded-2xl font-bold text-white shadow-xl hover:bg-cyan-500">UPDATE RUNNING TEXT</button></div>`;
+            document.getElementById('modal-content').innerHTML = html; openPopup();
         }
 
-        window.saveRunningText = function() {
-            const text = document.getElementById('new-marquee-text').value;
-            const speed = document.getElementById('new-marquee-speed').value;
-            window.dbUpdate(window.dbRef(window.db, 'settings/runningTextConfig'), { text, speed });
+        function saveRunningText() {
+            const txt = document.getElementById('new-marquee-text').value;
+            window.dbUpdate(window.dbRef(window.db, 'settings/runningTextConfig'), { text: txt, speed: 25 });
             closePopup();
         }
     </script>
