@@ -221,7 +221,7 @@
         let isTVMode = false;
         let tvPageIndex = 0;
         let tvInterval = null;
-        const MAX_PASIEN_TV = 4; // Berubah menjadi 4 grid
+        const MAX_PASIEN_TV = 4;
 
         function initDataSync() {
             if (!window.dbOnValue) { setTimeout(initDataSync, 500); return; }
@@ -265,7 +265,6 @@
         function renderGrid() {
             const container = document.getElementById('grid-pasien');
             container.innerHTML = '';
-
             const totalBeds = masterRuangan.length;
             const occupiedBeds = databasePasien.length;
             const bor = ((occupiedBeds / totalBeds) * 100).toFixed(1);
@@ -469,7 +468,6 @@
                 header.classList.add('hidden');
                 document.getElementById('tv-marquee').style.display = 'block';
                 document.body.style.padding = '0.5rem';
-                
                 grid.classList.remove('lg:grid-cols-3', 'grid-cols-2');
                 grid.classList.add('grid-cols-2', 'h-[calc(100vh-100px)]', 'gap-4', 'p-4'); 
                 
@@ -483,7 +481,6 @@
                 header.classList.remove('hidden');
                 document.getElementById('tv-marquee').style.display = 'none';
                 document.body.style.padding = '1.5rem';
-                
                 grid.classList.remove('grid-cols-2', 'h-[calc(100vh-100px)]', 'gap-4', 'p-4');
                 grid.classList.add('lg:grid-cols-3', 'grid-cols-2');
                 document.getElementById('exit-tv')?.remove(); 
@@ -493,11 +490,32 @@
 
         function openKalkulator() {
             document.getElementById('popup-title').innerText = "Drug Calculator";
-            document.getElementById('modal-content').innerHTML = `<div class="space-y-4"><label>Dosis Diminta (mg/mcg)</label><input type="number" id="calc-d" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"><div class="grid grid-cols-2 gap-4"><div><label>Sediaan Tersedia</label><input type="number" id="calc-t" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"></div><div><label>Volume (ml)</label><input type="number" id="calc-i" class="w-full p-4 rounded-xl font-bold" oninput="oninput="doCalc()"></div></div><div class="p-8 bg-emerald-500/10 rounded-3xl text-center border border-emerald-500/30 mt-6"><p class="text-[10px] text-emerald-400 font-black tracking-widest mb-2 uppercase">Hasil Ambilan:</p><h2 id="calc-res" class="text-5xl font-header font-black text-emerald-400">0 ml</h2></div></div>`;
+            document.getElementById('modal-content').innerHTML = `
+                <div class="space-y-4">
+                    <label>Dosis Diminta (mg/mcg)</label>
+                    <input type="number" id="calc-d" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label>Sediaan Tersedia</label>
+                            <input type="number" id="calc-t" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
+                        </div>
+                        <div>
+                            <label>Volume (ml)</label>
+                            <input type="number" id="calc-i" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
+                        </div>
+                    </div>
+                    <div class="p-8 bg-emerald-500/10 rounded-3xl text-center border border-emerald-500/30 mt-6">
+                        <p class="text-[10px] text-emerald-400 font-black tracking-widest mb-2 uppercase">Hasil Ambilan:</p>
+                        <h2 id="calc-res" class="text-5xl font-header font-black text-emerald-400">0 ml</h2>
+                    </div>
+                </div>`;
             openPopup();
         }
+
         function doCalc() {
-            const d = parseFloat(document.getElementById('calc-d').value) || 0, t = parseFloat(document.getElementById('calc-t').value) || 0, i = parseFloat(document.getElementById('calc-i').value) || 0;
+            const d = parseFloat(document.getElementById('calc-d').value) || 0, 
+                  t = parseFloat(document.getElementById('calc-t').value) || 0, 
+                  i = parseFloat(document.getElementById('calc-i').value) || 0;
             const res = t > 0 ? (d/t)*i : 0;
             document.getElementById('calc-res').innerText = (res % 1 === 0 ? res : res.toFixed(2)) + " ml";
         }
@@ -514,14 +532,35 @@
         function openRunningTextEditor() {
             document.getElementById('popup-title').innerText = "Edit Running Text";
             const currentText = document.getElementById('marquee-content').innerText;
-            let html = `<div class="space-y-6"><div class="bg-white/5 p-6 rounded-3xl border border-white/10"><label class="text-cyan-400 mb-2">Pesan Mode TV</label><textarea id="new-marquee-text" class="w-full h-32 p-4 rounded-xl font-bold bg-black/40 border border-white/10 outline-none focus:border-cyan-500">${currentText}</textarea></div><button onclick="saveRunningText()" class="w-full py-5 bg-cyan-600 rounded-2xl font-bold text-white shadow-xl hover:bg-cyan-500">UPDATE RUNNING TEXT</button></div>`;
-            document.getElementById('modal-content').innerHTML = html; openPopup();
+            let html = `
+                <div class="space-y-6">
+                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+                        <label>Pesan Running Text</label>
+                        <textarea id="new-running-text" class="w-full h-32 p-4 rounded-xl text-sm font-bold bg-black/40 border border-white/10 outline-none focus:border-cyan-500">${currentText}</textarea>
+                    </div>
+                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+                        <label>Kecepatan (Detik - Semakin kecil semakin cepat)</label>
+                        <input type="number" id="new-running-speed" class="w-full p-4 rounded-xl font-bold bg-black/40 border border-white/10" value="25">
+                    </div>
+                    <button onclick="saveRunningText()" class="w-full py-5 bg-cyan-600 rounded-2xl font-header font-bold text-white shadow-xl hover:bg-cyan-500 transition-all">
+                        SIMPAN & TERAPKAN
+                    </button>
+                </div>`;
+            document.getElementById('modal-content').innerHTML = html;
+            openPopup();
         }
 
         function saveRunningText() {
-            const txt = document.getElementById('new-marquee-text').value;
-            window.dbUpdate(window.dbRef(window.db, 'settings/runningTextConfig'), { text: txt, speed: 25 });
-            closePopup();
+            const newText = document.getElementById('new-running-text').value;
+            const newSpeed = document.getElementById('new-running-speed').value;
+            if (newText) {
+                window.dbUpdate(window.dbRef(window.db, 'settings/runningTextConfig'), {
+                    text: newText,
+                    speed: newSpeed
+                }).then(() => {
+                    closePopup();
+                });
+            }
         }
     </script>
 </body>
