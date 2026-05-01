@@ -267,16 +267,14 @@
         let tvInterval = null;
         const MAX_PASIEN_TV = 4;
 
-        // --- NEW: PROMKES SETTINGS ---
-        let isShowingMedia = false;
-        let mediaIndex = 0;
-        const mediaPromkes = [
-            { type: 'image', url: 'https://i.ibb.co.com/hR4wCYJW/1777552840436.jpg' }, //
-            { type: 'image', url: 'https://i.ibb.co.com/bM5J0GH1/Brimston.png' }, //
-            { type: 'image', url: 'https://i.ibb.co.com/Q33n97zB/vvip.png' }, //Contoh Gambar Edukasi
-            { type: 'video', url: 'https://www.w3schools.com/html/mov_bbb.mp' } // Contoh Video Edukasi
-        ];
-
+    // --- UPDATED: PROMKES SETTINGS (IMAGE ONLY) ---
+let isShowingMedia = false;
+let mediaIndex = 0;
+const mediaPromkes = [
+    { type: 'image', url: 'https://i.ibb.co.com/hR4wCYJW/1777552840436.jpg' },
+    { type: 'image', url: 'https://i.ibb.co.com/bM5J0GH1/Brimston.png' },
+    { type: 'image', url: 'https://i.ibb.co.com/Q33n97zB/vvip.png' }
+];
         function initDataSync() {
             if (!window.dbOnValue) { setTimeout(initDataSync, 500); return; }
 
@@ -311,7 +309,7 @@
         }
 
         function updateClock() { document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false }); }
-        setInterval(updateClock, 1000); updateClock();
+        setInterval(updateClock, 1800); updateClock();
 
         function closePopup() { document.getElementById('popup-menu').style.opacity = '0'; document.getElementById('popup-menu').style.pointerEvents = 'none'; }
         function openPopup() { document.getElementById('popup-menu').style.opacity = '1'; document.getElementById('popup-menu').style.pointerEvents = 'auto'; }
@@ -564,7 +562,7 @@
                         }
                     }
                     renderGrid();
-                }, 10000); // Rotasi setiap 10 detik
+                }, 20000); // Rotasi setiap 20 detik
 
                 sidebar.classList.add('hidden');
                 header.classList.add('hidden');
