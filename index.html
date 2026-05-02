@@ -532,7 +532,39 @@ const mediaPromkes = [
             </div>`;
             document.getElementById('modal-content').innerHTML = html; openPopup();
         }
-
+   function kirimLaporanWA() {
+            let text = `*LAPORAN VVIP BHARA DAKSA*%0A📆 ${new Date().toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'})}%0A---------------------------------------%0A`;
+            masterRuangan.forEach((ruang, index) => {
+                const p = databasePasien.find(pasien => pasien.ruang === ruang);
+                text += `${index + 1}. ${ruang}: ${p ? `*${p.nama.toUpperCase()}* (${p.penjamin})` : '_KOSONG_'}%0A`;
+            });
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+        
+            function openKalkulator() {
+            document.getElementById('popup-title').innerText = "Drug Calculator";
+            document.getElementById('modal-content').innerHTML = `
+                <div class="space-y-4">
+                    <label>Dosis Diminta (mg/mcg)</label>
+                    <input type="number" id="calc-d" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label>Sediaan Tersedia</label>
+                            <input type="number" id="calc-t" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
+                        </div>
+                        <div>
+                            <label>Volume (ml)</label>
+                            <input type="number" id="calc-i" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
+                        </div>
+                    </div>
+                    <div class="p-8 bg-emerald-500/10 rounded-3xl text-center border border-emerald-500/30 mt-6">
+                        <p class="text-[10px] text-emerald-400 font-black tracking-widest mb-2 uppercase">Hasil Ambilan:</p>
+                        <h2 id="calc-res" class="text-5xl font-header font-black text-emerald-400">0 ml</h2>
+                    </div>
+                </div>`;
+            openPopup();
+        }
+ 
         function toggleTVMode() {
             isTVMode = !isTVMode;
             tvPageIndex = 0;
