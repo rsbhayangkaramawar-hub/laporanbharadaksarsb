@@ -280,7 +280,7 @@ let mediaIndex = 0;
 const mediaPromkes = [
     { type: 'image', url: 'https://i.ibb.co.com/hR4wCYJW/1777552840436.jpg' },
     { type: 'image', url: 'https://i.ibb.co.com/bM5J0GH1/Brimston.png' },
-    { type: 'image', url: 'https://i.ibb.co.com/Q33n97zB/vvip.png' }
+    { type: 'image', url: 'https://i.ibb.co.com/KjpVBWRN/IS2.png' }
 ];
         function initDataSync() {
             if (!window.dbOnValue) { setTimeout(initDataSync, 500); return; }
@@ -532,6 +532,38 @@ const mediaPromkes = [
             </div>`;
             document.getElementById('modal-content').innerHTML = html; openPopup();
         }
+                function openKalkulator() {
+            document.getElementById('popup-title').innerText = "Drug Calculator";
+            document.getElementById('modal-content').innerHTML = `
+                <div class="space-y-4">
+                    <label>Dosis Diminta (mg/mcg)</label>
+                    <input type="number" id="calc-d" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label>Sediaan Tersedia</label>
+                            <input type="number" id="calc-t" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
+                        </div>
+                        <div>
+                            <label>Volume (ml)</label>
+                            <input type="number" id="calc-i" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
+                        </div>
+                    </div>
+                    <div class="p-8 bg-emerald-500/10 rounded-3xl text-center border border-emerald-500/30 mt-6">
+                        <p class="text-[10px] text-emerald-400 font-black tracking-widest mb-2 uppercase">Hasil Ambilan:</p>
+                        <h2 id="calc-res" class="text-5xl font-header font-black text-emerald-400">0 ml</h2>
+                    </div>
+                </div>`;
+            openPopup();
+        }
+
+        function doCalc() {
+            const d = parseFloat(document.getElementById('calc-d').value) || 0, 
+                  t = parseFloat(document.getElementById('calc-t').value) || 0, 
+                  i = parseFloat(document.getElementById('calc-i').value) || 0;
+            const res = t > 0 ? (d/t)*i : 0;
+            document.getElementById('calc-res').innerText = (res % 1 === 0 ? res : res.toFixed(2)) + " ml";
+        }
+
    function kirimLaporanWA() {
             let text = `*LAPORAN VVIP BHARA DAKSA*%0A📆 ${new Date().toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'})}%0A---------------------------------------%0A`;
             masterRuangan.forEach((ruang, index) => {
