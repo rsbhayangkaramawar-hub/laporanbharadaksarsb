@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VVIP BHARA DAKSA - COMMAND CENTER v26.6</title>
+    <title>VVIP BHARA DAKSA - COMMAND CENTER v27.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -29,159 +29,88 @@
             border-bottom-width: 2px;
             border-right-width: 2px;
         }
-
-        .card-vvip {
-            box-shadow: var(--gold-glow);
-            border-color: rgba(251, 191, 36, 0.2);
-        }
-
-        .card-bd {
-            box-shadow: var(--cyan-glow);
-            border-color: rgba(6, 182, 212, 0.2);
-        }
-
-        .patient-card:hover { 
-            transform: translateY(-5px); 
-        }
+        .card-vvip { box-shadow: var(--gold-glow); border-color: rgba(251, 191, 36, 0.2); }
+        .card-bd { box-shadow: var(--cyan-glow); border-color: rgba(6, 182, 212, 0.2); }
+        .patient-card:hover { transform: translateY(-5px); }
         .card-vvip:hover { box-shadow: 0 5px 20px rgba(251, 191, 36, 0.6), 0 0 10px rgba(251, 191, 36, 0.4); }
         .card-bd:hover { box-shadow: 0 5px 20px rgba(6, 182, 212, 0.6), 0 0 10px rgba(6, 182, 212, 0.4); }
-
-        .not-visite { 
-            box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.15); 
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-        .card-vvip.not-visite { box-shadow: var(--gold-glow), inset 0 0 20px rgba(239, 68, 68, 0.15); }
-        .card-bd.not-visite { box-shadow: var(--cyan-glow), inset 0 0 20px rgba(239, 68, 68, 0.15); }
+        .not-visite { box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); }
         
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.3); border-radius: 10px; }
         input, select, textarea { background: rgba(0,0,0,0.5) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
         label { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; display: block; }
-
-        @keyframes marquee {
-            0% { transform: translateX(100vw); }
-            100% { transform: translateX(-100%); }
-        }
-        .marquee-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(2, 6, 23, 0.95);
-            backdrop-filter: blur(15px);
-            border-top: 3px solid #06b6d4;
-            padding: 15px 0;
-            z-index: 100;
-            overflow: hidden;
-            display: none; 
-        }
-        .marquee-text {
-            display: inline-block;
-            white-space: nowrap;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            font-size: 36px;
-            color: #00f2ff;
-            text-transform: uppercase;
-            animation: marquee linear infinite;
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        /* --- STYLES KHUSUS CETAK --- */
-        #print-area { display: none; }
-        @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { 
-                display: grid !important; 
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 20px; 
-                position: absolute; left: 0; top: 0; width: 100%; 
-            }
-            .print-card {
-                border: 3px solid #f97316; 
-                border-radius: 25px;       
-                padding: 15px;             
-                text-align: center;
-                width: 240px;              
-                height: 120px;             
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                page-break-inside: avoid;
-                margin: 5px auto;          
-                background: white !important;
-            }
-            .print-card h1 { 
-                font-family: 'Inter', sans-serif; 
-                font-size: 10pt; font-weight: 900; color: black; 
-                text-transform: uppercase; margin-bottom: 2px;
-            }
-            .print-card h2 { 
-                font-family: 'Orbitron', sans-serif; 
-                font-size: 12pt; font-weight: 900; color: black; 
-                text-transform: uppercase;
-            }
-        }
+        
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
-
-    <aside id="main-sidebar" class="w-24 glass-panel rounded-[2.5rem] flex flex-col items-center py-10 gap-8">
-        <div class="w-14 h-14 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl rotate-45 flex items-center justify-center cursor-pointer shadow-xl mb-4" onclick="location.reload()">
+    <aside id="main-sidebar" class="w-24 glass-panel rounded-[2.5rem] flex flex-col items-center py-8 gap-6">
+        <div class="w-14 h-14 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl rotate-45 flex items-center justify-center cursor-pointer shadow-xl mb-2" onclick="location.reload()">
             <span class="text-white text-xl font-black -rotate-45 font-header">BD</span>
         </div>
         
-        <nav class="flex flex-col gap-8">
+        <nav class="flex flex-col gap-5 overflow-y-auto custom-scrollbar py-2">
             <div onclick="openInputPasien()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
-                <i class="fa-solid fa-user-plus text-2xl text-cyan-400"></i>
+                <i class="fa-solid fa-user-plus text-xl text-cyan-400"></i>
                 <p class="text-[8px] font-bold text-cyan-400 uppercase mt-1">Input</p>
             </div>
             <div onclick="toggleTVMode()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
-                <i id="tv-icon" class="fa-solid fa-tv text-2xl text-blue-400"></i>
+                <i id="tv-icon" class="fa-solid fa-tv text-xl text-blue-400"></i>
                 <p id="tv-text" class="text-[8px] font-bold text-blue-400 uppercase mt-1">TV Mode</p>
             </div>
             <div onclick="openKalkulator()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
-                <i class="fa-solid fa-calculator text-2xl text-emerald-400"></i>
+                <i class="fa-solid fa-calculator text-xl text-emerald-400"></i>
                 <p class="text-[8px] font-bold text-emerald-400 uppercase mt-1">Dosis</p>
             </div>
+            <div onclick="openRekapDPJP()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
+                <i class="fa-solid fa-chart-pie text-xl text-purple-400"></i>
+                <p class="text-[8px] font-bold text-purple-400 uppercase mt-1">DPJP</p>
+            </div>
+            <div onclick="openArsipBulanan()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
+                <i class="fa-solid fa-calendar-check text-xl text-amber-400"></i>
+                <p class="text-[8px] font-bold text-amber-400 uppercase mt-1">Arsip</p>
+            </div>
             <div onclick="kirimLaporanWA()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
-                <div class="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center border border-green-500/20">
-                    <i class="fa-brands fa-whatsapp text-2xl text-green-400"></i>
+                <div class="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center border border-green-500/20">
+                    <i class="fa-brands fa-whatsapp text-xl text-green-400"></i>
                 </div>
                 <p class="text-[8px] font-bold text-green-400 uppercase mt-1">Report</p>
             </div>
-            <div onclick="cetakSemuaKartu()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
-                <i class="fa-solid fa-print text-2xl text-orange-400"></i>
-                <p class="text-[8px] font-bold text-orange-400 uppercase mt-1">KARTU</p>
-            </div>
             <div onclick="openMgmtDokter()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
-                <i class="fa-solid fa-user-doctor text-2xl text-fuchsia-400"></i>
+                <i class="fa-solid fa-user-doctor text-xl text-fuchsia-400"></i>
                 <p class="text-[8px] font-bold text-fuchsia-400 uppercase mt-1">Dokter</p>
-            </div>
-            <div onclick="openRunningTextEditor()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
-                <i class="fa-solid fa-gears text-2xl text-slate-400"></i>
-                <p class="text-[8px] font-bold text-slate-400 uppercase mt-1">TEXT</p>
             </div>
         </nav>
     </aside>
-
     <div class="flex-1 flex flex-col gap-6">
-        <header id="main-header" class="h-28 glass-panel rounded-[2.5rem] flex items-center px-12">
+        <!-- BANNER NOTIFIKASI OTOMATIS TANGGAL 1 -->
+        <div id="banner-tanggal-satu" class="hidden glass-panel border border-amber-500/50 bg-amber-500/10 rounded-[2rem] px-8 py-4 flex items-center justify-between shadow-lg animate-pulse">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-400 text-xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h3 class="font-header font-bold text-amber-400 text-sm uppercase tracking-widest">Pengingat Rekapitulasi Bulanan (Tanggal 1)</h3>
+                    <p class="text-xs text-slate-300">Hari ini adalah hari pertama bulan baru. Arsip data pasien bulan sebelumnya telah/sedang diunduh otomatis.</p>
+                </div>
+            </div>
+            <button onclick="downloadArsipBulanLalu()" class="px-6 py-3 bg-amber-500 text-slate-950 font-header font-black text-xs rounded-xl shadow-lg hover:bg-amber-400 transition-all uppercase flex items-center gap-2">
+                <i class="fa-solid fa-download"></i> Download Arsip Bulan Lalu
+            </button>
+        </div>
+        <header id="main-header" class="h-28 glass-panel rounded-[2.5rem] flex items-center px-12 justify-between">
             <div>
                 <h1 class="text-4xl font-header font-black text-white uppercase tracking-tighter">VVIP <span class="text-cyan-400">BHARA DAKSA</span></h1>
                 <p class="text-[10px] tracking-[0.8em] text-slate-500 font-bold uppercase mt-1">Daily Ops Control</p>
             </div>
-
-            <div class="flex ml-20 gap-8">
+            
+            <div class="flex items-center bg-black/40 border border-white/10 rounded-2xl px-4 py-2.5 w-72 focus-within:border-cyan-400 transition-all">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 mr-3 text-sm"></i>
+                <input type="text" id="search-input" placeholder="Cari nama, RM, ruang, diagnosa..." class="bg-transparent border-none outline-none text-xs w-full text-white placeholder-slate-500 font-semibold focus:outline-none focus:ring-0">
+            </div>
+            <div class="flex gap-8">
                 <div class="flex flex-col">
                     <span id="bor-percentage" class="text-3xl font-header font-bold text-emerald-400 leading-none">0%</span>
                     <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest mt-1">BOR RATE</p>
@@ -191,33 +120,27 @@
                     <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest mt-1">OCCUPIED</p>
                 </div>
             </div>
-
-            <div class="ml-auto text-right">
+            <div class="text-right">
                 <span id="live-clock" class="text-3xl font-header font-bold text-white tracking-widest">00:00:00</span>
                 <p class="text-[9px] text-green-500 font-bold uppercase mt-1">Terminal Active</p>
             </div>
         </header>
-        <main id="grid-pasien" class="flex-1 grid grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pr-4 custom-scrollbar content-start pb-20"></main>
+        <!-- CONTAINER UTAMA (GRID PASIEN FULL SCREEN DI MODE TV) -->
+        <div id="wrapper-content" class="flex-1 flex gap-6 overflow-hidden">
+            <!-- Grid Pasien -->
+            <main id="grid-pasien" class="flex-1 grid grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pr-4 custom-scrollbar content-start pb-20"></main>
+        </div>
     </div>
-
-    <div id="print-area"></div>
-
-    <div id="tv-marquee" class="marquee-container">
-        <div id="marquee-content" class="marquee-text">WELCOME TO BHARA DAKSA COMMAND CENTER - RELIABLE & PROFESIONAL SERVICE</div>
-    </div>
-
-    <div id="popup-menu" class="fixed left-36 top-10 w-[500px] h-[85vh] glass-panel rounded-[3rem] p-10 z-[150] opacity-0 pointer-events-none transition-all duration-300">
+    <div id="popup-menu" class="fixed left-36 top-10 w-[600px] h-[85vh] glass-panel rounded-[3rem] p-10 z-[150] opacity-0 pointer-events-none transition-all duration-300">
         <div class="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
             <h2 id="popup-title" class="font-header text-xl text-cyan-400 uppercase tracking-widest leading-none">Detail</h2>
             <button onclick="closePopup()" class="text-slate-500 font-bold text-xs hover:text-white">[TUTUP]</button>
         </div>
         <div id="modal-content" class="overflow-y-auto max-h-[72vh] pr-2 custom-scrollbar"></div>
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
         const firebaseConfig = {
             apiKey: "AIzaSyDR0iUObfanmCgfSaCXHbWZEi2gDxyEhBE",
             authDomain: "laporan-bhara-daksa.firebaseapp.com",
@@ -227,24 +150,20 @@
             messagingSenderId: "532273007065",
             appId: "1:532273007065:web:c917977fe077cffd8571c8"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-
         window.db = db;
         window.dbRef = ref;
         window.dbSet = set;
         window.dbUpdate = update;
         window.dbRemove = remove;
         window.dbOnValue = onValue;
-
         initDataSync();
     </script>
-
     <script>
         const masterRuangan = ["VVIP 01", "VVIP 02", "VVIP 03", "VVIP 04", "BHARA DAKSA 5A", "BHARA DAKSA 5B", "BHARA DAKSA 6A", "BHARA DAKSA 6B", "BHARA DAKSA 7A", "BHARA DAKSA 7B", "BHARA DAKSA 8A", "BHARA DAKSA 8B"];
         
-          const specialistIcons = {
+        const specialistIcons = {
             "SP.BS": { icon: "fa-brain", color: "text-orange-400", label: "Bedah Saraf" },
             "SP.OT": { icon: "fa-bone", color: "text-slate-300", label: "Orthopedi" },
             "SP.B": { icon: "fa-kit-medical", color: "text-red-500", label: "Bedah Umum" },
@@ -265,47 +184,91 @@
             "SP.Rad":{ icon: "fa-x-ray", color: "text-zinc-500", label: "Radiologi" },
             "DEFAULT": { icon: "fa-user-doctor", color: "text-yellow-400", label: "Dokter" }
         };
-
         let databasePasien = [];
+        let riwayatPasien = [];
         let daftarDokter = [];
-        
         let isTVMode = false;
-        let tvPageIndex = 0;
-        let tvInterval = null;
-        const MAX_PASIEN_TV = 4;
+        let tvSlideIndex = 0;
+        let tvSlideInterval = null;
 
-    // --- UPDATED: PROMKES SETTINGS (IMAGE ONLY) ---
-let isShowingMedia = false;
-let mediaIndex = 0;
-const mediaPromkes = [
-    { type: 'image', url: 'https://i.ibb.co.com/hR4wCYJW/1777552840436.jpg' },
-    { type: 'image', url: 'https://i.ibb.co.com/bM5J0GH1/Brimston.png' },
-    { type: 'image', url: 'https://i.ibb.co.com/KjpVBWRN/IS2.png' }
-];
         function initDataSync() {
             if (!window.dbOnValue) { setTimeout(initDataSync, 500); return; }
-
             window.dbOnValue(window.dbRef(window.db, 'pasien'), (snapshot) => {
                 const data = snapshot.val();
                 databasePasien = data ? Object.values(data) : [];
                 renderGrid();
             });
-
+            window.dbOnValue(window.dbRef(window.db, 'riwayat_pasien'), (snapshot) => {
+                const data = snapshot.val();
+                riwayatPasien = data ? Object.values(data) : [];
+                
+                cekDanDownloadArsipOtomatis();
+            });
             window.dbOnValue(window.dbRef(window.db, 'dokter'), (snapshot) => {
                 const data = snapshot.val();
                 daftarDokter = data ? Object.values(data) : [];
             });
-
-            window.dbOnValue(window.dbRef(window.db, 'settings/runningTextConfig'), (snapshot) => {
-                const val = snapshot.val();
-                if(val) {
-                    const el = document.getElementById('marquee-content');
-                    el.innerText = val.text;
-                    el.style.animationDuration = `${val.speed || 25}s`;
-                }
-            });
+            document.getElementById('search-input')?.addEventListener('input', renderGrid);
+            cekTanggalSatu();
         }
 
+        function cekDanDownloadArsipOtomatis() {
+            const today = new Date();
+            if (today.getDate() === 1) {
+                const targetDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                const targetBulan = targetDate.toISOString().slice(0, 7); 
+                const storageKey = `auto_download_arsip_${targetBulan}`;
+                const sudahDidownload = localStorage.getItem(storageKey);
+
+                if (!sudahDidownload) {
+                    setTimeout(() => {
+                        downloadArsipOtomatisBulanLalu(targetBulan);
+                        localStorage.setItem(storageKey, 'true');
+                    }, 3000); 
+                }
+            }
+        }
+
+        function downloadArsipOtomatisBulanLalu(targetBulan) {
+            const filtered = riwayatPasien.filter(p => p.bulanTahun === targetBulan || (p.tglMasuk && p.tglMasuk.startsWith(targetBulan)));
+            if (filtered.length === 0) return; 
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "NO RM,NAMA PASIEN,UMUR,PENJAMIN,DIAGNOSA,DPJP,ALAMAT,RUANGAN,TGL MASUK,TGL KELUAR,HARI RAWAT\n";
+            
+            filtered.forEach(p => {
+                const durasi = hitungHariRawat(p.tglMasuk, p.tglKeluar);
+                const row = [
+                    `"${p.noRm || ''}"`,
+                    `"${p.nama || ''}"`,
+                    `"${p.umur || ''}"`,
+                    `"${p.penjamin || ''}"`,
+                    `"${p.diagnosa || ''}"`,
+                    `"${(p.dpjp || []).join('; ')}"`,
+                    `"${p.alamat || ''}"`,
+                    `"${p.ruang || ''}"`,
+                    `"${p.tglMasuk || ''}"`,
+                    `"${p.tglKeluar || ''}"`,
+                    `"${durasi} Hari"`
+                ].join(",");
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `REGISTRASI_PASIEN_OTOMATIS_${targetBulan}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function cekTanggalSatu() {
+            const today = new Date();
+            if (today.getDate() === 1) {
+                document.getElementById('banner-tanggal-satu').classList.remove('hidden');
+            }
+        }
         function getSpec(name) {
             if (!name) return specialistIcons.DEFAULT;
             const n = name.toUpperCase();
@@ -314,20 +277,34 @@ const mediaPromkes = [
             }
             return specialistIcons.DEFAULT;
         }
-
+        function getPenjaminBadge(penjamin) {
+            const p = (penjamin || '').toUpperCase();
+            if (p === 'BPJS') return 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30';
+            if (p === 'POLRI') return 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
+            if (p === 'UMUM') return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+            if (p === 'ASURANSI') return 'bg-purple-500/20 text-purple-400 border border-purple-500/30';
+            return 'bg-slate-500/20 text-slate-300 border border-slate-500/30';
+        }
+        function hitungHariRawat(tglMasuk, tglKeluar) {
+            if (!tglMasuk) return 0;
+            const start = new Date(tglMasuk);
+            const end = tglKeluar ? new Date(tglKeluar) : new Date();
+            start.setHours(0,0,0,0);
+            end.setHours(0,0,0,0);
+            const diffTime = end.getTime() - start.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays <= 0 ? 1 : diffDays + 1; 
+        }
         function updateClock() { document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false }); }
-        setInterval(updateClock, 1800); updateClock();
-
+        setInterval(updateClock, 1000); updateClock();
         function closePopup() { document.getElementById('popup-menu').style.opacity = '0'; document.getElementById('popup-menu').style.pointerEvents = 'none'; }
         function openPopup() { document.getElementById('popup-menu').style.opacity = '1'; document.getElementById('popup-menu').style.pointerEvents = 'auto'; }
-
         function renderGrid() {
             const container = document.getElementById('grid-pasien');
             container.innerHTML = '';
             const totalBeds = masterRuangan.length;
             const occupiedBeds = databasePasien.length;
             const bor = ((occupiedBeds / totalBeds) * 100).toFixed(1);
-
             document.getElementById('bor-percentage').innerText = bor + "%";
             document.getElementById('bed-count').innerText = `${occupiedBeds}/${totalBeds}`;
             
@@ -335,107 +312,349 @@ const mediaPromkes = [
             if (bor > 80) borEl.className = "text-3xl font-header font-bold text-red-500 leading-none";
             else if (bor > 50) borEl.className = "text-3xl font-header font-bold text-orange-400 leading-none";
             else borEl.className = "text-3xl font-header font-bold text-emerald-400 leading-none";
-
-            // LOGIKA TV MODE DENGAN PROMKES
-            if (isTVMode && isShowingMedia) {
-                const media = mediaPromkes[mediaIndex];
-                let mediaHtml = '';
-                if (media.type === 'image') {
-                    mediaHtml = `<img src="${media.url}" class="w-full h-full object-contain rounded-[3rem] shadow-2xl animate-fade-in">`;
-                } else {
-                    mediaHtml = `<video src="${media.url}" autoplay muted loop class="w-full h-full object-cover rounded-[3rem] shadow-2xl"></video>`;
-                }
-                container.innerHTML = `<div class="col-span-full h-[80vh] flex justify-center items-center">${mediaHtml}</div>`;
+            let displayData = [...databasePasien].sort((a, b) => masterRuangan.indexOf(a.ruang) - masterRuangan.indexOf(b.ruang));
+            const searchQuery = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+            if (searchQuery !== '') {
+                displayData = displayData.filter(p => 
+                    (p.nama && p.nama.toLowerCase().includes(searchQuery)) ||
+                    (p.noRm && p.noRm.toLowerCase().includes(searchQuery)) ||
+                    (p.ruang && p.ruang.toLowerCase().includes(searchQuery)) ||
+                    (p.diagnosa && p.diagnosa.toLowerCase().includes(searchQuery))
+                );
+            }
+            if (isTVMode) {
+                container.className = "flex-1 grid grid-cols-3 grid-rows-2 gap-6 h-full"; 
+                const itemsPerPage = 6;
+                const totalPages = Math.ceil(displayData.length / itemsPerPage) || 1;
+                
+                if (tvSlideIndex >= totalPages) tvSlideIndex = 0;
+                const startIdx = tvSlideIndex * itemsPerPage;
+                displayData = displayData.slice(startIdx, startIdx + itemsPerPage);
+            } else {
+                container.className = "flex-1 grid grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pr-4 custom-scrollbar content-start pb-20";
+            }
+            if (displayData.length === 0) {
+                container.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center h-64 text-slate-500 font-bold uppercase tracking-widest text-xs">Tidak ada data pasien aktif</div>`;
                 return;
             }
-
-            let displayData = [...databasePasien].sort((a, b) => masterRuangan.indexOf(a.ruang) - masterRuangan.indexOf(b.ruang));
-
-            if (isTVMode && displayData.length > MAX_PASIEN_TV) {
-                const start = tvPageIndex * MAX_PASIEN_TV;
-                displayData = displayData.slice(start, start + MAX_PASIEN_TV);
-            }
-
             displayData.forEach(data => {
                 const isElite = data.ruang.includes("VVIP");
                 const pendingTasks = data.tasks ? data.tasks.filter(t => !t.done).length : 0;
+                const hariRawat = hitungHariRawat(data.tglMasuk, null);
+                const penjaminBadgeStyle = getPenjaminBadge(data.penjamin);
                 const dpjpHtml = (data.dpjp || []).map(docName => {
                     const s = getSpec(docName);
                     return `
                         <div class="flex items-center gap-2 mb-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.05]">
                             <div class="w-8 h-8 rounded-lg bg-slate-900/50 flex items-center justify-center">
-                                <i class="fa-solid ${s.icon} ${s.color} text-3xl"></i>
+                                <i class="fa-solid ${s.icon} ${s.color} text-2xl"></i>
                             </div>
                             <div class="flex flex-col">
-                                <span class="${isTVMode ? 'text-[24px]' : 'text-[20px]'} font-bold text-slate-100 leading-tight">${docName}</span>
-                                <span class="text-[12px] font-black ${s.color} uppercase tracking-tighter leading-none">${s.label}</span>
+                                <span class="text-[18px] font-bold text-slate-100 leading-tight">${docName}</span>
+                                <span class="text-[10px] font-black ${s.color} uppercase tracking-tighter leading-none">${s.label}</span>
                             </div>
                         </div>`;
                 }).join('');
-
+                
                 const card = document.createElement('div');
-                card.className = `patient-card fade-in glass-panel rounded-[3rem] p-8 border-l-[6px] ${isElite ? 'border-l-amber-500 card-vvip' : 'border-l-cyan-500 card-bd'} ${!data.sudahVisite ? 'not-visite' : ''} ${isTVMode ? 'h-full flex flex-col justify-between' : ''}`;
+                card.className = `patient-card fade-in glass-panel rounded-[3rem] p-8 border-l-[6px] ${isElite ? 'border-l-amber-500 card-vvip' : 'border-l-cyan-500 card-bd'} ${!data.sudahVisite ? 'not-visite' : ''} flex flex-col justify-between`;
                 card.onclick = () => openEditPasien(data.id);
                 card.innerHTML = `
                     <div>
-                        <div class="flex justify-between items-start mb-6">
-                        <div class="px-5 py-1.5 rounded-xl bg-white/5 border border-white/10 ${isTVMode ? 'text-4xl' : 'text-lg'} font-header font-black ${isElite ? 'text-amber-400' : 'text-cyan-400'}">${data.ruang}</div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="px-5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-lg font-header font-black ${isElite ? 'text-amber-400' : 'text-cyan-400'}">${data.ruang}</div>
                             <div class="flex items-center gap-2">
-                                ${pendingTasks > 0 ? `<div class="px-2.5 py-1 bg-red-600 rounded-full animate-pulse flex items-center gap-1 shadow-lg shadow-red-600/20"><i class="fa-solid fa-list-check text-[10px] text-white"></i><span class="text-[10px] font-black text-white">${pendingTasks}</span></div>` : ''}
+                                ${pendingTasks > 0 ? `<div class="px-2.5 py-1 bg-red-600 rounded-full animate-pulse flex items-center gap-1"><span class="text-[10px] font-black text-white">${pendingTasks} Tasks</span></div>` : ''}
                                 <div class="px-3 py-1 rounded-full text-[10px] font-black ${data.sudahVisite ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'} uppercase">${data.sudahVisite ? '● Visited' : '○ Not Visited'}</div>
                             </div>
                         </div>
                         <div class="mb-4">
-                            <h3 class="${isTVMode ? 'text-5xl' : 'text-3xl'} font-black text-white uppercase truncate tracking-tighter">${data.nama}</h3>
-                            <p class="${isTVMode ? 'text-xl' : 'text-sm'} font-bold text-slate-500 uppercase mt-1">${data.umur} THN • <span class="${isElite ? 'text-amber-500' : 'text-cyan-500'}">${data.penjamin}</span></p>
+                            <span class="text-[10px] font-black text-slate-400 tracking-wider">RM: ${data.noRm || '-'}</span>
+                            <h3 class="text-3xl font-black text-white uppercase truncate tracking-tighter">${data.nama}</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs font-bold text-slate-400 uppercase">${data.umur || '-'} THN</span>
+                                <span class="text-xs font-bold text-slate-600">•</span>
+                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-black ${penjaminBadgeStyle}">${data.penjamin}</span>
+                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-blue-500/20 text-blue-400 border border-blue-500/30"><i class="fa-solid fa-clock mr-1"></i>HARI KE-${hariRawat}</span>
+                            </div>
+                            <p class="text-[10px] text-slate-500 font-semibold truncate mt-1"><i class="fa-solid fa-location-dot mr-1"></i>${data.alamat || '-'}</p>
                         </div>
-                        <p class="${isTVMode ? 'text-1xl' : 'text-md'} font-bold text-slate-200 uppercase mb-4">${data.diagnosa}</p>
+                        <p class="text-md font-bold text-slate-200 uppercase mb-4">${data.diagnosa}</p>
                     </div>
-                    <div class="border-t border-white/3 pt-4 flex flex-col">${dpjpHtml}</div>`;
+                    <div class="border-t border-white/5 pt-4 flex flex-col">${dpjpHtml}</div>`;
                 container.appendChild(card);
             });
         }
-
-        // --- FUNGSI CETAK KARTU ---
-        function cetakSemuaKartu() {
-            const area = document.getElementById('print-area');
-            area.innerHTML = '';
-            if(databasePasien.length === 0) { alert("Tidak ada data pasien."); return; }
-            const sorted = [...databasePasien].sort((a, b) => masterRuangan.indexOf(a.ruang) - masterRuangan.indexOf(b.ruang));
-            sorted.forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'print-card';
-                card.innerHTML = `<h1>${p.nama} / ${p.umur} THN</h1><h2>${p.ruang}</h2>`;
-                area.appendChild(card);
-            });
-            window.print();
+        function openInputPasien() {
+            document.getElementById('popup-title').innerText = "Register Pasien Baru";
+            const tersedia = masterRuangan.filter(r => !databasePasien.map(p => p.ruang).includes(r));
+            const today = new Date().toISOString().split('T')[0];
+            let html = `<form onsubmit="savePasien(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label>Nama Pasien</label><input type="text" id="p-nama" class="w-full p-3 rounded-xl font-bold" placeholder="Nama Lengkap" required></div>
+                    <div><label>No. RM</label><input type="text" id="p-norm" class="w-full p-3 rounded-xl font-bold" placeholder="00-00-00" required></div>
+                </div>
+                <div class="grid grid-cols-[2fr_1fr_2fr] gap-3">
+                    <div><label>Ruangan</label><select id="p-ruang" class="p-3 rounded-xl font-bold w-full" required>${tersedia.map(r => `<option value="${r}">${r}</option>`).join('')}</select></div>
+                    <div><label>Umur (Thn)</label><input type="number" id="p-umur" class="p-3 rounded-xl font-bold w-full" placeholder="Thn" required></div>
+                    <div><label>Penjamin</label><select id="p-penjamin" class="p-3 rounded-xl font-bold w-full"><option>BPJS</option><option>POLRI</option><option>UMUM</option><option>ASURANSI</option></select></div>
+                </div>
+                <div><label>Alamat Lengkap</label><input type="text" id="p-alamat" class="w-full p-3 rounded-xl font-bold" placeholder="Alamat Pasien" required></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label>Diagnosa</label><input type="text" id="p-diagnosa" class="w-full p-3 rounded-xl font-bold" placeholder="Diagnosa Masuk" required></div>
+                    <div><label>Tanggal Masuk</label><input type="date" id="p-tglmasuk" value="${today}" class="w-full p-3 rounded-xl font-bold" required></div>
+                </div>
+                <div>
+                    <label>Pilih DPJP</label>
+                    <div class="grid grid-cols-1 gap-2 max-h-36 overflow-y-auto pr-2 custom-scrollbar bg-black/20 p-2 rounded-xl">
+                        ${daftarDokter.map(d => `<label class="flex items-center p-2 bg-white/5 rounded-xl cursor-pointer"><input type="checkbox" value="${d}" class="p-input-doc w-4 h-4 mr-3 accent-indigo-500"><span class="text-xs font-bold text-slate-300">${d}</span></label>`).join('')}
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-4 bg-indigo-600 rounded-2xl font-header font-bold text-white shadow-xl hover:bg-indigo-500">SIMPAN & DAFTARKAN PASIEN</button>
+            </form>`;
+            document.getElementById('modal-content').innerHTML = html; openPopup();
         }
-
         function savePasien(e) {
             e.preventDefault();
             const id = Date.now();
+            const tglMasukVal = document.getElementById('p-tglmasuk').value;
             const pData = {
-                id: id, nama: document.getElementById('p-nama').value,
-                ruang: document.getElementById('p-ruang').value, umur: document.getElementById('p-umur').value,
-                penjamin: document.getElementById('p-penjamin').value, diagnosa: document.getElementById('p-diagnosa').value,
+                id: id,
+                nama: document.getElementById('p-nama').value,
+                noRm: document.getElementById('p-norm').value,
+                ruang: document.getElementById('p-ruang').value,
+                umur: document.getElementById('p-umur').value,
+                penjamin: document.getElementById('p-penjamin').value,
+                alamat: document.getElementById('p-alamat').value,
+                diagnosa: document.getElementById('p-diagnosa').value,
+                tglMasuk: tglMasukVal,
+                tglKeluar: "",
+                bulanTahun: tglMasukVal.slice(0, 7),
                 dpjp: Array.from(document.querySelectorAll('.p-input-doc:checked')).map(cb => cb.value),
                 tasks: [], catatan: "", sudahVisite: false
             };
             window.dbSet(window.dbRef(window.db, 'pasien/' + id), pData);
             closePopup();
         }
-
+        function openArsipBulanan() {
+            document.getElementById('popup-title').innerText = "Arsip & Registrasi Bulanan Pasien";
+            const currentBulan = new Date().toISOString().slice(0, 7);
+            let html = `
+            <div class="space-y-4">
+                <div class="flex items-center justify-between bg-white/5 p-3 rounded-2xl border border-white/10">
+                    <div class="flex items-center gap-3">
+                        <label class="text-xs font-bold text-cyan-400 m-0">Filter Bulan:</label>
+                        <input type="month" id="filter-bulan" value="${currentBulan}" class="p-2 rounded-xl text-xs font-bold bg-black/50" onchange="renderListArsip()">
+                    </div>
+                    <button onclick="exportKeCSV()" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-500"><i class="fa-solid fa-file-excel mr-1"></i> Export Excel/CSV</button>
+                </div>
+                <div id="arsip-container" class="space-y-2 max-h-[55vh] overflow-y-auto custom-scrollbar"></div>
+            </div>`;
+            
+            document.getElementById('modal-content').innerHTML = html;
+            openPopup();
+            renderListArsip();
+        }
+        function renderListArsip() {
+            const bulan = document.getElementById('filter-bulan').value;
+            const container = document.getElementById('arsip-container');
+            const filtered = riwayatPasien.filter(p => p.bulanTahun === bulan || (p.tglMasuk && p.tglMasuk.startsWith(bulan)));
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-slate-500 font-bold uppercase text-xs tracking-widest">Tidak ada data pasien terdaftar di bulan ini</div>`;
+                return;
+            }
+            let html = `<div class="text-xs font-bold text-slate-400 mb-2">Total Pasien Terdaftar: <span class="text-emerald-400">${filtered.length} Pasien</span></div>`;
+            filtered.forEach(p => {
+                const totalHari = hitungHariRawat(p.tglMasuk, p.tglKeluar);
+                const penjaminBadgeStyle = getPenjaminBadge(p.penjamin);
+                html += `
+                <div class="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-2">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[10px] font-black text-amber-400 uppercase tracking-wider">RM: ${p.noRm || '-'}</span>
+                            <h4 class="font-bold text-white text-sm uppercase">${p.nama} (${p.umur || '-'} THN)</h4>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase ${penjaminBadgeStyle}">${p.penjamin}</span>
+                            <span class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase bg-blue-500/20 text-blue-400 border border-blue-500/30"><i class="fa-solid fa-bed mr-1"></i>${totalHari} HARI RAWAT</span>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-300 font-semibold"><i class="fa-solid fa-stethoscope mr-1 text-cyan-400"></i> ${p.diagnosa}</p>
+                    <p class="text-[10px] text-slate-400"><i class="fa-solid fa-user-doctor mr-1 text-purple-400"></i> DPJP: ${(p.dpjp || []).join(', ') || '-'}</p>
+                    <p class="text-[10px] text-slate-400"><i class="fa-solid fa-location-dot mr-1 text-red-400"></i> Alamat: ${p.alamat || '-'}</p>
+                    <div class="pt-2 border-t border-white/5 flex justify-between text-[9px] font-bold text-slate-500">
+                        <span>MASUK: <strong class="text-white">${p.tglMasuk || '-'}</strong></span>
+                        <span>KELUAR: <strong class="text-white">${p.tglKeluar || '-'}</strong></span>
+                        <span>RUANG: <strong class="text-cyan-400">${p.ruang}</strong></span>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+        window.exportKeCSV = function() {
+            const bulan = document.getElementById('filter-bulan').value;
+            const filtered = riwayatPasien.filter(p => p.bulanTahun === bulan || (p.tglMasuk && p.tglMasuk.startsWith(bulan)));
+            if(filtered.length === 0) { alert('Tidak ada data untuk diexport!'); return; }
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "NO RM,NAMA PASIEN,UMUR,PENJAMIN,DIAGNOSA,DPJP,ALAMAT,RUANGAN,TGL MASUK,TGL KELUAR,HARI RAWAT\n";
+            filtered.forEach(p => {
+                const durasi = hitungHariRawat(p.tglMasuk, p.tglKeluar);
+                const row = [
+                    `"${p.noRm || ''}"`,
+                    `"${p.nama || ''}"`,
+                    `"${p.umur || ''}"`,
+                    `"${p.penjamin || ''}"`,
+                    `"${p.diagnosa || ''}"`,
+                    `"${(p.dpjp || []).join('; ')}"`,
+                    `"${p.alamat || ''}"`,
+                    `"${p.ruang || ''}"`,
+                    `"${p.tglMasuk || ''}"`,
+                    `"${p.tglKeluar || ''}"`,
+                    `"${durasi} Hari"`
+                ].join(",");
+                csvContent += row + "\n";
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `REGISTRASI_PASIEN_${bulan}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        function downloadArsipBulanLalu() {
+            const date = new Date();
+            date.setMonth(date.getMonth() - 1);
+            const targetBulan = date.toISOString().slice(0, 7);
+            const filtered = riwayatPasien.filter(p => p.bulanTahun === targetBulan || (p.tglMasuk && p.tglMasuk.startsWith(targetBulan)));
+            if (filtered.length === 0) {
+                alert(`Tidak ada data arsip pasien untuk bulan lalu (${targetBulan}).`);
+                return;
+            }
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "NO RM,NAMA PASIEN,UMUR,PENJAMIN,DIAGNOSA,DPJP,ALAMAT,RUANGAN,TGL MASUK,TGL KELUAR,HARI RAWAT\n";
+            filtered.forEach(p => {
+                const durasi = hitungHariRawat(p.tglMasuk, p.tglKeluar);
+                const row = [
+                    `"${p.noRm || ''}"`,
+                    `"${p.nama || ''}"`,
+                    `"${p.umur || ''}"`,
+                    `"${p.penjamin || ''}"`,
+                    `"${p.diagnosa || ''}"`,
+                    `"${(p.dpjp || []).join('; ')}"`,
+                    `"${p.alamat || ''}"`,
+                    `"${p.ruang || ''}"`,
+                    `"${p.tglMasuk || ''}"`,
+                    `"${p.tglKeluar || ''}"`,
+                    `"${durasi} Hari"`
+                ].join(",");
+                csvContent += row + "\n";
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `REGISTRASI_PASIEN_BULAN_LALU_${targetBulan}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`Arsip rekap bulan ${targetBulan} berhasil diunduh secara otomatis!`);
+        }
+        function openEditPasien(id) {
+            const p = databasePasien.find(item => item.id === id);
+            document.getElementById('popup-title').innerText = p.nama;
+            let html = `<div class="space-y-5">
+                <div class="flex border border-white/10 rounded-2xl overflow-hidden p-1 bg-white/5">
+                    <button onclick="toggleVisite(${id}, false)" class="flex-1 py-3 font-bold text-xs rounded-xl ${!p.sudahVisite ? 'bg-red-600 shadow-lg' : 'text-slate-500'}">BELUM VISITE</button>
+                    <button onclick="toggleVisite(${id}, true)" class="flex-1 py-3 font-bold text-xs rounded-xl ${p.sudahVisite ? 'bg-green-600 shadow-lg' : 'text-slate-500'}">SUDAH VISITE</button>
+                </div>
+                <div class="grid grid-cols-2 gap-3 bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <div><label>No. RM</label><input type="text" id="edit-norm" class="w-full p-2.5 rounded-xl text-xs font-bold" value="${p.noRm || ''}"></div>
+                    <div><label>Alamat</label><input type="text" id="edit-alamat" class="w-full p-2.5 rounded-xl text-xs font-bold" value="${p.alamat || ''}"></div>
+                    <div class="col-span-2"><label>Diagnosa</label><input type="text" id="edit-diagnosa" class="w-full p-2.5 rounded-xl text-xs font-bold" value="${p.diagnosa}"></div>
+                </div>
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <p class="text-[10px] font-black text-fuchsia-400 mb-2 uppercase tracking-widest">Daily Tasks</p>
+                    <div class="flex gap-2 mb-3"><input type="text" id="task-in" class="flex-1 p-2 rounded-xl text-xs bg-black/20" placeholder="Tugas baru..."><button onclick="addTask(${id})" class="px-4 bg-fuchsia-600 rounded-xl font-bold text-xs">+</button></div>
+                    <div class="space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar">${(p.tasks || []).map((t, i) => `<div class="flex justify-between items-center bg-black/40 p-2.5 rounded-xl border border-white/5"><div class="flex items-center gap-3"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${id}, ${i})" class="w-4 h-4 accent-green-500"><span class="text-xs ${t.done?'line-through text-slate-500':'text-slate-200'}">${t.text}</span></div><button onclick="delTask(${id}, ${i})" class="text-red-500 text-xs">✕</button></div>`).join('')}</div>
+                </div>
+                <div class="bg-white/5 p-4 rounded-2xl"><p class="text-[10px] font-black text-cyan-400 mb-1 uppercase tracking-widest">Catatan Medis</p><textarea id="edit-catatan" class="w-full h-16 p-3 rounded-xl text-xs bg-black/20 outline-none border border-white/5 focus:border-cyan-500">${p.catatan || ''}</textarea></div>
+                
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/10"><p class="text-[10px] font-black text-indigo-400 mb-2 uppercase tracking-widest">Manajemen DPJP</p><div class="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto bg-black/20 p-2 rounded-xl">${daftarDokter.map(d => `<label class="flex items-center p-2 bg-white/5 rounded-lg cursor-pointer"><input type="checkbox" value="${d}" ${(p.dpjp || []).includes(d) ? 'checked' : ''} class="edit-dpjp-check w-4 h-4 mr-3 accent-indigo-500"><span class="text-[11px] font-bold text-slate-300">${d}</span></label>`).join('')}</div></div>
+                <div class="pt-2 space-y-2">
+                    <button onclick="saveEdit(${id})" class="w-full py-3 bg-cyan-600 rounded-xl font-bold text-white text-xs shadow-xl hover:bg-cyan-500">SIMPAN PERUBAHAN</button>
+                    <button onclick="pulangkanPasien(${id})" class="w-full py-3 bg-emerald-600 rounded-xl font-bold text-white text-xs shadow-xl hover:bg-emerald-500 uppercase tracking-wider">● PASIEN PULANG / KELUAR</button>
+                    <button onclick="hapusPasien(${id})" class="w-full py-1 text-red-500 text-[10px] font-black uppercase tracking-widest">Hapus Permanen</button>
+                </div>
+            </div>`;
+            document.getElementById('modal-content').innerHTML = html; openPopup();
+        }
         function saveEdit(id) { 
             const updates = {};
-            updates[`pasien/${id}/catatan`] = document.getElementById('edit-catatan').value; 
+            updates[`pasien/${id}/noRm`] = document.getElementById('edit-norm').value;
+            updates[`pasien/${id}/alamat`] = document.getElementById('edit-alamat').value;
             updates[`pasien/${id}/diagnosa`] = document.getElementById('edit-diagnosa').value;
+            updates[`pasien/${id}/catatan`] = document.getElementById('edit-catatan').value; 
             updates[`pasien/${id}/dpjp`] = Array.from(document.querySelectorAll('.edit-dpjp-check:checked')).map(cb => cb.value);
             window.dbUpdate(window.dbRef(window.db), updates);
             closePopup(); 
         }
-
+        function pulangkanPasien(id) {
+            const p = databasePasien.find(item => item.id === id);
+            if (!p) return;
+            if (confirm(`Apakah pasien ${p.nama} (RM: ${p.noRm || '-'}) sudah PULANG / KELUAR?\nData registrasi akan diarsipkan secara permanen.`)) {
+                const now = new Date();
+                const record = {
+                    ...p,
+                    tglKeluar: now.toISOString().split('T')[0],
+                    bulanTahun: p.tglMasuk ? p.tglMasuk.slice(0, 7) : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+                };
+                window.dbSet(window.dbRef(window.db, 'riwayat_pasien/' + id), record);
+                window.dbRemove(window.dbRef(window.db, 'pasien/' + id));
+                closePopup();
+            }
+        }
+        function openRekapDPJP() {
+            document.getElementById('popup-title').innerText = "Rekap DPJP Pasien Active";
+            const rekap = {};
+            databasePasien.forEach(pasien => {
+                if (pasien.dpjp && Array.isArray(pasien.dpjp)) {
+                    pasien.dpjp.forEach(doc => {
+                        if (!rekap[doc]) rekap[doc] = [];
+                        rekap[doc].push(pasien);
+                    });
+                }
+            });
+            const activeDocs = Object.keys(rekap).filter(doc => rekap[doc].length > 0);
+            activeDocs.sort((a, b) => rekap[b].length - rekap[a].length);
+            if (activeDocs.length === 0) {
+                document.getElementById('modal-content').innerHTML = `<div class="text-center py-12 text-slate-500 font-bold uppercase tracking-widest text-sm">Belum ada pasien aktif</div>`;
+                openPopup();
+                return;
+            }
+            let html = `<div class="space-y-3">`;
+            activeDocs.forEach(doc => {
+                const count = rekap[doc].length;
+                const spec = getSpec(doc);
+                html += `
+                <div class="bg-white/5 rounded-2xl border border-white/10 p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-slate-900/60 flex items-center justify-center"><i class="fa-solid ${spec.icon} ${spec.color} text-lg"></i></div>
+                            <div>
+                                <h4 class="font-bold text-sm text-white">${doc}</h4>
+                                <span class="text-[10px] font-black ${spec.color} uppercase">${spec.label}</span>
+                            </div>
+                        </div>
+                        <div class="px-3 py-1 rounded-xl bg-purple-600/30 border border-purple-500/40 text-purple-300 font-header font-black text-xs">${count} PASIEN</div>
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+            document.getElementById('modal-content').innerHTML = html;
+            openPopup();
+        }
         function toggleVisite(id, status) { window.dbUpdate(window.dbRef(window.db, `pasien/${id}`), { sudahVisite: status }); }
-        
         function addTask(id) { 
             const v = document.getElementById('task-in').value; 
             if(v) { 
@@ -446,31 +665,23 @@ const mediaPromkes = [
                 openEditPasien(id);
             } 
         }
-
         function toggleTask(id, i) {
             const p = databasePasien.find(p => p.id === id);
             p.tasks[i].done = !p.tasks[i].done;
             window.dbUpdate(window.dbRef(window.db, `pasien/${id}`), { tasks: p.tasks });
         }
-
         function delTask(id, i) {
             const p = databasePasien.find(p => p.id === id);
             p.tasks.splice(i,1);
             window.dbUpdate(window.dbRef(window.db, `pasien/${id}`), { tasks: p.tasks });
             openEditPasien(id);
         }
-
         function hapusPasien(id) { if(confirm('Hapus permanen?')) { window.dbRemove(window.dbRef(window.db, `pasien/${id}`)); closePopup(); } }
-
+        
         function addDokter() { 
             const v = document.getElementById('new-doc').value; 
-            if(v) { 
-                const newKey = Date.now();
-                window.dbSet(window.dbRef(window.db, 'dokter/' + newKey), v);
-                openMgmtDokter(); 
-            } 
+            if(v) { window.dbSet(window.dbRef(window.db, 'dokter/' + Date.now()), v); openMgmtDokter(); } 
         }
-
         function removeDokter(docName) { 
             window.dbOnValue(window.dbRef(window.db, 'dokter'), (snap) => {
                 const data = snap.val();
@@ -478,75 +689,23 @@ const mediaPromkes = [
             }, {onlyOnce: true});
             openMgmtDokter();
         }
-
-        function openInputPasien() {
-            document.getElementById('popup-title').innerText = "Register Pasien";
-            const tersedia = masterRuangan.filter(r => !databasePasien.map(p => p.ruang).includes(r));
-            let html = `<form onsubmit="savePasien(event)" class="space-y-4">
-                <input type="text" id="p-nama" class="w-full p-4 rounded-2xl font-bold" placeholder="NAMA LENGKAP" required>
-                <div class="grid grid-cols-2 gap-4">
-                    <select id="p-ruang" class="p-4 rounded-2xl font-bold" required>${tersedia.map(r => `<option value="${r}">${r}</option>`).join('')}</select>
-                    <input type="number" id="p-umur" class="p-4 rounded-2xl font-bold" placeholder="UMUR" required>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <select id="p-penjamin" class="p-4 rounded-2xl font-bold"><option>BPJS</option><option>POLRI</option><option>UMUM</option><option>ASURANSI</option></select>
-                    <input type="text" id="p-diagnosa" class="p-4 rounded-2xl font-bold" placeholder="DIAGNOSA" required>
-                </div>
-                <div class="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
-                    ${daftarDokter.map(d => `<label class="flex items-center p-3 bg-white/5 rounded-xl cursor-pointer"><input type="checkbox" value="${d}" class="p-input-doc w-5 h-5 mr-3 accent-indigo-500"><span class="text-xs font-bold text-slate-300">${d}</span></label>`).join('')}
-                </div>
-                <button type="submit" class="w-full py-5 bg-indigo-600 rounded-2xl font-header font-bold text-white shadow-xl">DAFTARKAN PASIEN</button>
-            </form>`;
-            document.getElementById('modal-content').innerHTML = html; openPopup();
-        }
-
-        function openEditPasien(id) {
-            const p = databasePasien.find(item => item.id === id);
-            document.getElementById('popup-title').innerText = p.nama;
-            let html = `<div class="space-y-6">
-                <div class="flex border border-white/10 rounded-2xl overflow-hidden p-1 bg-white/5">
-                    <button onclick="toggleVisite(${id}, false)" class="flex-1 py-4 font-bold rounded-xl ${!p.sudahVisite ? 'bg-red-600 shadow-lg' : 'text-slate-500'}">BELUM VISITE</button>
-                    <button onclick="toggleVisite(${id}, true)" class="flex-1 py-4 font-bold rounded-xl ${p.sudahVisite ? 'bg-green-600 shadow-lg' : 'text-slate-500'}">SUDAH VISITE</button>
-                </div>
-                <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
-                    <p class="text-[10px] font-black text-emerald-400 mb-2 uppercase tracking-widest">Update Diagnosa</p>
-                    <input type="text" id="edit-diagnosa" class="w-full p-4 rounded-xl text-sm font-bold bg-black/40 border border-white/10 focus:border-emerald-500 outline-none" value="${p.diagnosa}">
-                </div>
-                <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
-                    <p class="text-[10px] font-black text-fuchsia-400 mb-4 uppercase tracking-widest">Daily Tasks</p>
-                    <div class="flex gap-2 mb-4"><input type="text" id="task-in" class="flex-1 p-3 rounded-xl text-sm bg-black/20" placeholder="Tugas baru..."><button onclick="addTask(${id})" class="px-5 bg-fuchsia-600 rounded-xl font-bold">+</button></div>
-                    <div class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">${(p.tasks || []).map((t, i) => `<div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5"><div class="flex items-center gap-3"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${id}, ${i})" class="w-4 h-4 accent-green-500"><span class="text-sm ${t.done?'line-through text-slate-500':'text-slate-200'}">${t.text}</span></div><button onclick="delTask(${id}, ${i})" class="text-red-500 text-xs">✕</button></div>`).join('')}</div>
-                </div>
-                <div class="bg-white/5 p-6 rounded-3xl"><p class="text-[10px] font-black text-cyan-400 mb-2 uppercase tracking-widest">Catatan Medis</p><textarea id="edit-catatan" class="w-full h-20 p-4 rounded-xl text-sm bg-black/20 outline-none border border-white/5 focus:border-cyan-500">${p.catatan || ''}</textarea></div>
-                <div class="bg-white/5 p-6 rounded-3xl border border-white/10"><p class="text-[10px] font-black text-indigo-400 mb-4 uppercase tracking-widest">Manajemen DPJP</p><div class="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto bg-black/20 p-3 rounded-xl">${daftarDokter.map(d => `<label class="flex items-center p-2 bg-white/5 rounded-lg cursor-pointer"><input type="checkbox" value="${d}" ${(p.dpjp || []).includes(d) ? 'checked' : ''} class="edit-dpjp-check w-4 h-4 mr-3 accent-indigo-500"><span class="text-[11px] font-bold text-slate-300">${d}</span></label>`).join('')}</div></div>
-                <div class="pt-2"><button onclick="saveEdit(${id})" class="w-full py-5 bg-cyan-600 rounded-2xl font-bold text-white shadow-xl hover:bg-cyan-500 mb-4">SIMPAN PERUBAHAN</button><button onclick="hapusPasien(${id})" class="w-full py-2 text-red-500 text-[10px] font-black uppercase tracking-widest">Hapus Pasien</button></div>
-            </div>`;
-            document.getElementById('modal-content').innerHTML = html; openPopup();
-        }
-
         function openMgmtDokter() {
             document.getElementById('popup-title').innerText = "Database Dokter";
             let html = `<div class="space-y-4">
-                <div class="flex gap-2"><input type="text" id="new-doc" class="flex-1 p-4 rounded-xl font-bold" placeholder="Nama & Gelar"><button onclick="addDokter()" class="px-6 bg-indigo-600 rounded-xl font-bold shadow-lg">+</button></div>
-                <div class="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">${daftarDokter.map((d, i) => `<div class="p-4 bg-white/5 rounded-xl border border-white/5 flex justify-between items-center group"><div class="flex items-center gap-3"><i class="fa-solid ${getSpec(d).icon} ${getSpec(d).color} text-xs"></i><span class="font-bold">${d}</span></div><button onclick="removeDokter('${d}')" class="text-red-500 opacity-0 group-hover:opacity-100">Hapus</button></div>`).join('')}</div>
+                <div class="flex gap-2"><input type="text" id="new-doc" class="flex-1 p-4 rounded-xl font-bold text-xs" placeholder="Nama & Gelar"><button onclick="addDokter()" class="px-6 bg-indigo-600 rounded-xl font-bold shadow-lg">+</button></div>
+                <div class="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">${daftarDokter.map((d) => `<div class="p-3 bg-white/5 rounded-xl border border-white/5 flex justify-between items-center group"><div class="flex items-center gap-3"><i class="fa-solid ${getSpec(d).icon} ${getSpec(d).color} text-xs"></i><span class="font-bold text-xs">${d}</span></div><button onclick="removeDokter('${d}')" class="text-red-500 text-xs opacity-0 group-hover:opacity-100">Hapus</button></div>`).join('')}</div>
             </div>`;
             document.getElementById('modal-content').innerHTML = html; openPopup();
         }
-                function openKalkulator() {
+        function openKalkulator() {
             document.getElementById('popup-title').innerText = "Drug Calculator";
             document.getElementById('modal-content').innerHTML = `
                 <div class="space-y-4">
                     <label>Dosis Diminta (mg/mcg)</label>
                     <input type="number" id="calc-d" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label>Sediaan Tersedia</label>
-                            <input type="number" id="calc-t" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
-                        </div>
-                        <div>
-                            <label>Volume (ml)</label>
-                            <input type="number" id="calc-i" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
-                        </div>
+                        <div><label>Sediaan Tersedia</label><input type="number" id="calc-t" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"></div>
+                        <div><label>Volume (ml)</label><input type="number" id="calc-i" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()"></div>
                     </div>
                     <div class="p-8 bg-emerald-500/10 rounded-3xl text-center border border-emerald-500/30 mt-6">
                         <p class="text-[10px] text-emerald-400 font-black tracking-widest mb-2 uppercase">Hasil Ambilan:</p>
@@ -555,105 +714,53 @@ const mediaPromkes = [
                 </div>`;
             openPopup();
         }
-
         function doCalc() {
-            const d = parseFloat(document.getElementById('calc-d').value) || 0, 
-                  t = parseFloat(document.getElementById('calc-t').value) || 0, 
-                  i = parseFloat(document.getElementById('calc-i').value) || 0;
+            const d = parseFloat(document.getElementById('calc-d').value) || 0, t = parseFloat(document.getElementById('calc-t').value) || 0, i = parseFloat(document.getElementById('calc-i').value) || 0;
             const res = t > 0 ? (d/t)*i : 0;
             document.getElementById('calc-res').innerText = (res % 1 === 0 ? res : res.toFixed(2)) + " ml";
         }
-
-   function kirimLaporanWA() {
+        function kirimLaporanWA() {
             let text = `*LAPORAN VVIP BHARA DAKSA*%0A📆 ${new Date().toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'})}%0A---------------------------------------%0A`;
             masterRuangan.forEach((ruang, index) => {
                 const p = databasePasien.find(pasien => pasien.ruang === ruang);
-                text += `${index + 1}. ${ruang}: ${p ? `*${p.nama.toUpperCase()}* (${p.penjamin})` : '_KOSONG_'}%0A`;
+                if (p) {
+                    const hariRawat = hitungHariRawat(p.tglMasuk, null);
+                    text += `${index + 1}. ${ruang}: *${p.nama.toUpperCase()}* [RM: ${p.noRm || '-'}] (${p.penjamin}) - Hari ke-${hariRawat}%0A`;
+                } else {
+                    text += `${index + 1}. ${ruang}: _KOSONG_%0A`;
+                }
             });
             window.open(`https://wa.me/?text=${text}`, '_blank');
         }
-        
-            function openKalkulator() {
-            document.getElementById('popup-title').innerText = "Drug Calculator";
-            document.getElementById('modal-content').innerHTML = `
-                <div class="space-y-4">
-                    <label>Dosis Diminta (mg/mcg)</label>
-                    <input type="number" id="calc-d" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label>Sediaan Tersedia</label>
-                            <input type="number" id="calc-t" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
-                        </div>
-                        <div>
-                            <label>Volume (ml)</label>
-                            <input type="number" id="calc-i" class="w-full p-4 rounded-xl font-bold" oninput="doCalc()">
-                        </div>
-                    </div>
-                    <div class="p-8 bg-emerald-500/10 rounded-3xl text-center border border-emerald-500/30 mt-6">
-                        <p class="text-[10px] text-emerald-400 font-black tracking-widest mb-2 uppercase">Hasil Ambilan:</p>
-                        <h2 id="calc-res" class="text-5xl font-header font-black text-emerald-400">0 ml</h2>
-                    </div>
-                </div>`;
-            openPopup();
-        }
- 
         function toggleTVMode() {
             isTVMode = !isTVMode;
-            tvPageIndex = 0;
-            mediaIndex = 0;
-            isShowingMedia = false;
-
-            if (tvInterval) clearInterval(tvInterval);
-
-            const grid = document.getElementById('grid-pasien');
             const sidebar = document.getElementById('main-sidebar');
             const header = document.getElementById('main-header');
-
+            
             if (isTVMode) {
-                tvInterval = setInterval(() => {
-                    const totalPages = Math.ceil(databasePasien.length / MAX_PASIEN_TV);
-                    
-                    if (!isShowingMedia) {
-                        // Fase Pasien
-                        if (tvPageIndex < totalPages - 1) {
-                            tvPageIndex++;
-                        } else {
-                            // Pindah ke media jika halaman pasien habis
-                            isShowingMedia = true;
-                            tvPageIndex = 0;
-                        }
-                    } else {
-                        // Fase Media
-                        if (mediaIndex < mediaPromkes.length - 1) {
-                            mediaIndex++;
-                        } else {
-                            // Kembali ke pasien jika media habis
-                            isShowingMedia = false;
-                            mediaIndex = 0;
-                        }
-                    }
-                    renderGrid();
-                }, 20000); // Rotasi setiap 20 detik
-
                 sidebar.classList.add('hidden');
                 header.classList.add('hidden');
-                document.getElementById('tv-marquee').style.display = 'block';
-                document.body.style.padding = '0.5rem';
-                grid.classList.remove('lg:grid-cols-3', 'grid-cols-2');
-                grid.classList.add('grid-cols-2', 'h-[calc(100vh-100px)]', 'gap-4', 'p-4'); 
+                document.body.style.padding = '1rem';
                 
+                tvSlideIndex = 0;
+                tvSlideInterval = setInterval(() => {
+                    const itemsPerPage = 6;
+                    const totalPages = Math.ceil(databasePasien.length / itemsPerPage) || 1;
+                    tvSlideIndex = (tvSlideIndex + 1) % totalPages;
+                    renderGrid();
+                }, 20000);
                 const btn = document.createElement('div');
                 btn.id = "exit-tv"; btn.onclick = toggleTVMode;
-                btn.className = "fixed bottom-24 right-8 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center z-[200] cursor-pointer shadow-2xl animate-bounce";
-                btn.innerHTML = '<i class="fa-solid fa-xmark text-2xl text-white"></i>';
+                btn.className = "fixed bottom-6 right-6 w-14 h-14 bg-red-600 rounded-full flex items-center justify-center z-[200] cursor-pointer shadow-2xl animate-bounce";
+                btn.innerHTML = '<i class="fa-solid fa-xmark text-xl text-white"></i>';
                 document.body.appendChild(btn);
             } else { 
                 sidebar.classList.remove('hidden');
                 header.classList.remove('hidden');
-                document.getElementById('tv-marquee').style.display = 'none';
                 document.body.style.padding = '1.5rem';
-                grid.classList.remove('grid-cols-2', 'h-[calc(100vh-100px)]', 'gap-4', 'p-4');
-                grid.classList.add('grid-cols-2', 'lg:grid-cols-3');
+                
+                clearInterval(tvSlideInterval);
+                
                 const btn = document.getElementById('exit-tv');
                 if(btn) btn.remove();
             }
