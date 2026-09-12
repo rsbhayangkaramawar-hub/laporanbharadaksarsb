@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VVIP BHARA DAKSA - COMMAND CENTER v27.0</title>
+    <title>VVIP BHARA DAKSA - COMMAND CENTER v28.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -51,7 +51,7 @@
             <span class="text-white text-xl font-black -rotate-45 font-header">BD</span>
         </div>
         
-        <nav class="flex flex-col gap-5 overflow-y-auto custom-scrollbar py-2">
+        <nav class="flex flex-col gap-4 overflow-y-auto custom-scrollbar py-2">
             <div onclick="openInputPasien()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
                 <i class="fa-solid fa-user-plus text-xl text-cyan-400"></i>
                 <p class="text-[8px] font-bold text-cyan-400 uppercase mt-1">Input</p>
@@ -72,6 +72,16 @@
                 <i class="fa-solid fa-calendar-check text-xl text-amber-400"></i>
                 <p class="text-[8px] font-bold text-amber-400 uppercase mt-1">Arsip</p>
             </div>
+            <!-- MENU 1: JADWAL POLIKLINIK (LIHAT DAFTAR) -->
+            <div onclick="openJadwalPoliklinik()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
+                <i class="fa-solid fa-calendar-days text-xl text-yellow-400"></i>
+                <p class="text-[8px] font-bold text-yellow-400 uppercase mt-1">Poliklinik</p>
+            </div>
+            <!-- MENU 2: TAMBAH JADWAL PRAKTEK (INPUT / KELOLA JADWAL) -->
+            <div onclick="openTambahJadwalPraktek()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
+                <i class="fa-solid fa-clock-rotate-left text-xl text-orange-400"></i>
+                <p class="text-[8px] font-bold text-orange-400 uppercase mt-1">Praktik</p>
+            </div>
             <div onclick="kirimLaporanWA()" class="group cursor-pointer flex flex-col items-center transition-all hover:scale-110">
                 <div class="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center border border-green-500/20">
                     <i class="fa-brands fa-whatsapp text-xl text-green-400"></i>
@@ -85,7 +95,6 @@
         </nav>
     </aside>
     <div class="flex-1 flex flex-col gap-6">
-        <!-- BANNER NOTIFIKASI OTOMATIS TANGGAL 1 -->
         <div id="banner-tanggal-satu" class="hidden glass-panel border border-amber-500/50 bg-amber-500/10 rounded-[2rem] px-8 py-4 flex items-center justify-between shadow-lg animate-pulse">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-400 text-xl">
@@ -93,7 +102,7 @@
                 </div>
                 <div>
                     <h3 class="font-header font-bold text-amber-400 text-sm uppercase tracking-widest">Pengingat Rekapitulasi Bulanan (Tanggal 1)</h3>
-                    <p class="text-xs text-slate-300">Hari ini adalah hari pertama bulan baru. Arsip data pasien bulan sebelumnya telah/sedang diunduh otomatis.</p>
+                    <p class="text-xs text-slate-300">Hari ini adalah hari pertama bulan baru. Arsip data pasien bulan sebelumnya telah/sedang diunduh otomatis[cite: 4].</p>
                 </div>
             </div>
             <button onclick="downloadArsipBulanLalu()" class="px-6 py-3 bg-amber-500 text-slate-950 font-header font-black text-xs rounded-xl shadow-lg hover:bg-amber-400 transition-all uppercase flex items-center gap-2">
@@ -125,9 +134,7 @@
                 <p class="text-[9px] text-green-500 font-bold uppercase mt-1">Terminal Active</p>
             </div>
         </header>
-        <!-- CONTAINER UTAMA (GRID PASIEN FULL SCREEN DI MODE TV) -->
         <div id="wrapper-content" class="flex-1 flex gap-6 overflow-hidden">
-            <!-- Grid Pasien -->
             <main id="grid-pasien" class="flex-1 grid grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pr-4 custom-scrollbar content-start pb-20"></main>
         </div>
     </div>
@@ -187,6 +194,7 @@
         let databasePasien = [];
         let riwayatPasien = [];
         let daftarDokter = [];
+        let daftarJadwalPoli = [];
         let isTVMode = false;
         let tvSlideIndex = 0;
         let tvSlideInterval = null;
@@ -201,12 +209,15 @@
             window.dbOnValue(window.dbRef(window.db, 'riwayat_pasien'), (snapshot) => {
                 const data = snapshot.val();
                 riwayatPasien = data ? Object.values(data) : [];
-                
                 cekDanDownloadArsipOtomatis();
             });
             window.dbOnValue(window.dbRef(window.db, 'dokter'), (snapshot) => {
                 const data = snapshot.val();
                 daftarDokter = data ? Object.values(data) : [];
+            });
+            window.dbOnValue(window.dbRef(window.db, 'jadwal_poli'), (snapshot) => {
+                const data = snapshot.val();
+                daftarJadwalPoli = data ? Object.values(data) : [];
             });
             document.getElementById('search-input')?.addEventListener('input', renderGrid);
             cekTanggalSatu();
@@ -654,6 +665,148 @@
             document.getElementById('modal-content').innerHTML = html;
             openPopup();
         }
+
+        // --- MENU 1: JADWAL POLIKLINIK (HANYA LIHAT DAFTAR) ---
+        function openJadwalPoliklinik() {
+            document.getElementById('popup-title').innerText = "Jadwal Poliklinik Dokter Spesialis";
+            
+            window.dbOnValue(window.dbRef(window.db, 'jadwal_poli'), (snapshot) => {
+                const data = snapshot.val();
+                const jList = data ? Object.values(data) : [];
+
+                let html = `
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center bg-white/5 p-3 rounded-2xl border border-white/10">
+                        <span class="text-xs font-bold text-slate-300">Daftar Jadwal Praktik Aktif</span>
+                        <button onclick="openTambahJadwalPraktek()" class="px-3 py-1.5 bg-yellow-600 text-slate-950 font-header font-black text-[10px] rounded-xl hover:bg-yellow-500 transition-all uppercase">
+                            <i class="fa-solid fa-plus mr-1"></i> Kelola / Tambah Jadwal
+                        </button>
+                    </div>
+                    <div class="space-y-2 max-h-[60vh] overflow-y-auto custom-scrollbar">`;
+
+                if (jList.length === 0) {
+                    html += `<div class="text-center py-10 text-slate-500 font-bold uppercase text-xs">Belum ada jadwal poliklinik tersimpan</div>`;
+                } else {
+                    jList.forEach(j => {
+                        const spec = getSpec(j.dokter);
+                        html += `
+                        <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex justify-between items-center">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-white"><i class="fa-solid ${spec.icon} ${spec.color} mr-1"></i>${j.dokter}</span>
+                                </div>
+                                <p class="text-[10px] text-yellow-400 font-bold"><i class="fa-solid fa-calendar-days mr-1"></i>${j.hari}</p>
+                                <p class="text-[10px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>Jam: ${j.jam} | <span class="text-cyan-400">${j.ket || 'Poli Spesialis'}</span></p>
+                            </div>
+                        </div>`;
+                    });
+                }
+                html += `</div></div>`;
+                document.getElementById('modal-content').innerHTML = html;
+                openPopup();
+            }, { onlyOnce: true });
+        }
+
+        // --- MENU 2: TAMBAH JADWAL PRAKTEK (KHUSUS INPUT & HAPUS JADWAL) ---
+        function openTambahJadwalPraktek() {
+            document.getElementById('popup-title').innerText = "Form Tambah & Kelola Jadwal Praktik";
+            
+            let html = `
+            <div class="space-y-6">
+                <!-- Form Input -->
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-3">
+                    <h3 class="text-xs font-black text-orange-400 uppercase tracking-widest"><i class="fa-solid fa-circle-plus mr-1"></i> Input Jadwal Baru</h3>
+                    <div>
+                        <label>Pilih Dokter</label>
+                        <select id="jp-dokter" class="w-full p-2.5 rounded-xl text-xs font-bold bg-black/50">
+                            ${daftarDokter.map(d => `<option value="${d}">${d}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label>Hari Praktik (Bebas)</label>
+                            <input type="text" id="jp-hari" class="w-full p-2.5 rounded-xl text-xs font-bold bg-black/50" placeholder="Contoh: Senin, Rabu, Jumat" required>
+                        </div>
+                        <div>
+                            <label>Jam Praktik</label>
+                            <input type="text" id="jp-jam" class="w-full p-2.5 rounded-xl text-xs font-bold bg-black/50" placeholder="Contoh: 10.00" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label>Keterangan / Ruangan Poli</label>
+                        <input type="text" id="jp-ket" class="w-full p-2.5 rounded-xl text-xs font-bold bg-black/50" placeholder="Poli Spesialis / Lt. 2">
+                    </div>
+                    <button onclick="simpanJadwalPoli()" class="w-full py-3 bg-orange-600 text-white font-header font-black rounded-xl text-xs hover:bg-orange-500 transition-all uppercase">SIMPAN JADWAL PRAKTEK</button>
+                </div>
+
+                <!-- Daftar Manajemen / Hapus -->
+                <div>
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Daftar Jadwal (Kelola / Hapus)</h3>
+                    <div id="list-kelola-jadwal" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar"></div>
+                </div>
+            </div>`;
+
+            document.getElementById('modal-content').innerHTML = html;
+            openPopup();
+            renderListKelolaJadwal();
+        }
+
+        function simpanJadwalPoli() {
+            const dokter = document.getElementById('jp-dokter').value;
+            const hari = document.getElementById('jp-hari').value;
+            const jam = document.getElementById('jp-jam').value;
+            const ket = document.getElementById('jp-ket').value;
+
+            if (!hari || !jam) {
+                alert('Mohon isi hari dan jam praktik terlebih dahulu!');
+                return;
+            }
+
+            const id = Date.now();
+            const dataJadwal = { id, dokter, hari, jam, ket };
+            
+            window.dbSet(window.dbRef(window.db, 'jadwal_poli/' + id), dataJadwal);
+            alert('Jadwal praktik berhasil disimpan!');
+            openTambahJadwalPraktek(); // Refresh form
+        }
+
+        function hapusJadwalPoli(id) {
+            if (confirm('Hapus jadwal praktik ini?')) {
+                window.dbRemove(window.dbRef(window.db, 'jadwal_poli/' + id));
+                renderListKelolaJadwal();
+            }
+        }
+
+        function renderListKelolaJadwal() {
+            const container = document.getElementById('list-kelola-jadwal');
+            if (!container) return;
+
+            window.dbOnValue(window.dbRef(window.db, 'jadwal_poli'), (snapshot) => {
+                const data = snapshot.val();
+                const jList = data ? Object.values(data) : [];
+
+                if (jList.length === 0) {
+                    container.innerHTML = `<div class="text-center py-4 text-slate-500 font-bold uppercase text-xs">Belum ada jadwal</div>`;
+                    return;
+                }
+
+                let html = '';
+                jList.forEach(j => {
+                    const spec = getSpec(j.dokter);
+                    html += `
+                    <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex justify-between items-center">
+                        <div class="space-y-0.5">
+                            <span class="text-xs font-bold text-white"><i class="fa-solid ${spec.icon} ${spec.color} mr-1"></i>${j.dokter}</span>
+                            <p class="text-[10px] text-yellow-400 font-bold">${j.hari} (${j.jam})</p>
+                        </div>
+                        <button onclick="hapusJadwalPoli(${j.id})" class="text-red-500 text-xs hover:text-red-400 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            }, { onlyOnce: true });
+        }
+        // --- AKHIR PEMISAHAN MENU JADWAL ---
+
         function toggleVisite(id, status) { window.dbUpdate(window.dbRef(window.db, `pasien/${id}`), { sudahVisite: status }); }
         function addTask(id) { 
             const v = document.getElementById('task-in').value; 
