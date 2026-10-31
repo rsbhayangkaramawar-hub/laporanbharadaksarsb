@@ -146,21 +146,21 @@
             
             <!-- 3 LOGO MENYATU DENGAN BAR ATAS -->
             <div class="flex items-center gap-6 px-6 py-2.5 bg-white/[0.04] border border-amber-500/30 rounded-2xl shadow-inner backdrop-blur-sm">
-                <!-- Logo 1: Dokkes (Gambar URL Baru) -->
-                <div title="Kedokteran & Kesehatan" class="flex items-center justify-center hover:scale-110 transition-transform">
+                <!-- Logo 1: Dokkes -->
+                <div title="Kedokteran & Kesehatan" class="flex items-center justify-center hover:scale-110 transition-transform cursor-pointer">
                     <img src="https://i.ibb.co.com/svWB8f6q/logodokkes.png" alt="Logo Dokkes" class="h-12 w-auto object-contain drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">
                 </div>
                 
                 <div class="h-8 w-[1px] bg-white/10"></div>
                 
                 <!-- Logo 2: RS Bhayangkara Palu -->
-                <div title="RS Bhayangkara Palu" class="flex items-center justify-center hover:scale-110 transition-transform">
+                <div title="RS Bhayangkara Palu" class="flex items-center justify-center hover:scale-110 transition-transform cursor-pointer">
                     <img src="https://i.ibb.co.com/F4zqsJQw/RSBP-removebg-preview.png" alt="Logo RSBP" class="h-12 w-auto object-contain drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]">
                 </div>
 
                 <div class="h-8 w-[1px] bg-white/10"></div>
 
-                <!-- Logo 3 (Ganti URL gambar sesuai keinginan Anda) -->
+               <!-- Logo 3 (Ganti URL gambar sesuai keinginan Anda) -->
 <div title="Nama Keterangan Logo" class="flex items-center justify-center hover:scale-110 transition-transform">
     <img src="https://i.ibb.co.com/Myb9WvXc/1793461438865.png" alt="Logo 3" class="h-12 w-auto object-contain drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">
 </div>
@@ -248,9 +248,9 @@
         let tvSlideInterval = null;
 
         const tvImageSlides = [
-            { url: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80", title: "Fasilitas Rumah Sakit VVIP" },
-            { url: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80", title: "Layanan Medis Unggulan" },
-            { url: "https://images.unsplash.com/photo-1538108149393-fbbd81895907?auto=format&fit=crop&w=1200&q=80", title: "Kenyamanan & Keamanan Pasien" }
+            { url: "https://i.ibb.co.com/mFgQWR91/Hijau-Tua-Modern-Inspiratif-Pekerjaan-Thumbnail-You-Tube.png", title: "Fasilitas Rumah Sakit VVIP" },
+            { url: "https://i.ibb.co.com/B2LRC1Hc/Chat-GPT-Image-May-12-2026-07-00-30-PM.png", title: "Layanan Medis Unggulan" },
+            { url: "https://i.ibb.co.com/k61vq6jm/Waspada-Asap-Karhutla-Lindungi-Pernapasan.png", title: "Kenyamanan & Keamanan Pasien" }
         ];
 
         function initDataSync() {
@@ -383,17 +383,13 @@
                 
                 if (tvSlideIndex >= totalSlides) tvSlideIndex = 0;
 
+                /* MODE TV: SLIDE GAMBAR BERSIH TANPA KETERANGAN/OVERLAY */
                 if (tvSlideIndex >= totalPages) {
                     const imgIndex = tvSlideIndex - totalPages;
                     const currentImgSlide = tvImageSlides[imgIndex];
                     container.innerHTML = `
-                        <div class="col-span-full row-span-full glass-panel rounded-[3rem] p-6 flex flex-col items-center justify-center relative overflow-hidden fade-in border border-amber-500/30">
-                            <img src="${currentImgSlide.url}" alt="${currentImgSlide.title}" class="absolute inset-0 w-full h-full object-cover opacity-60">
-                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
-                            <div class="relative z-10 text-center bg-black/70 backdrop-blur-md px-10 py-6 rounded-3xl border border-amber-500/30 shadow-2xl">
-                                <span class="text-xs font-black text-amber-400 uppercase tracking-[0.4em] mb-2 block">Informasi VVIP Bhara Daksa</span>
-                                <h2 class="text-4xl font-header font-black text-white uppercase tracking-tight">${currentImgSlide.title}</h2>
-                            </div>
+                        <div class="col-span-full row-span-full glass-panel rounded-[3rem] overflow-hidden relative fade-in border border-amber-500/30 shadow-2xl">
+                            <img src="${currentImgSlide.url}" alt="Slide Gambar" class="w-full h-full object-cover">
                         </div>
                     `;
                     return;
