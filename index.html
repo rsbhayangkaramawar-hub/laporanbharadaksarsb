@@ -160,10 +160,10 @@
 
                 <div class="h-8 w-[1px] bg-white/10"></div>
 
-               <!-- Logo 3 (Ganti URL gambar sesuai keinginan Anda) -->
-<div title="Nama Keterangan Logo" class="flex items-center justify-center hover:scale-110 transition-transform">
-    <img src="https://i.ibb.co.com/Myb9WvXc/1793461438865.png" alt="Logo 3" class="h-12 w-auto object-contain drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">
-</div>
+               <!-- Logo 3 -->
+                <div title="Nama Keterangan Logo" class="flex items-center justify-center hover:scale-110 transition-transform">
+                    <img src="https://i.ibb.co.com/Myb9WvXc/1793461438865.png" alt="Logo 3" class="h-12 w-auto object-contain drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">
+                </div>
             </div>
 
             <div class="flex gap-8">
@@ -338,14 +338,16 @@
             }
             return specialistIcons.DEFAULT;
         }
-        function getPenjaminBadge(penjamin) {
-            const p = (penjamin || '').toUpperCase();
-            if (p === 'BPJS') return 'bg-blue-600/30 text-blue-300 border border-blue-500/50';
-            if (p === 'POLRI') return 'bg-amber-500/30 text-amber-300 border border-amber-500/50';
-            if (p === 'UMUM') return 'bg-emerald-500/30 text-emerald-300 border border-emerald-500/50';
-            if (p === 'ASURANSI') return 'bg-purple-500/30 text-purple-300 border border-purple-500/50';
-            return 'bg-slate-500/30 text-slate-300 border border-slate-500/50';
-        }
+function getPenjaminBadge(penjamin) {
+    const p = (penjamin || '').toUpperCase();
+    if (p === 'BPJS') return 'bg-emerald-500/30 text-emerald-300 border border-emerald-500/50'; // Hijau
+    if (p === 'POLRI') return 'bg-amber-500/30 text-amber-300 border border-amber-500/50'; // Kuning / Amber
+    if (p === 'PNS POLRI') return 'bg-orange-600/30 text-orange-400 border border-orange-500/60'; // Orange Tegas (Kontras dari POLRI)
+    if (p === 'KELUARGA POLRI') return 'bg-pink-500/30 text-pink-300 border border-pink-500/50'; // Pink
+    if (p === 'UMUM') return 'bg-slate-500/30 text-slate-300 border border-slate-500/50'; // Abu-abu
+    if (p === 'ASURANSI') return 'bg-purple-500/30 text-purple-300 border border-purple-500/50'; // Ungu
+    return 'bg-slate-500/30 text-slate-300 border border-slate-500/50';
+}
         function hitungHariRawat(tglMasuk, tglKeluar) {
             if (!tglMasuk) return 0;
             const start = new Date(tglMasuk);
@@ -464,7 +466,7 @@
                 <div class="grid grid-cols-[2fr_1fr_2fr] gap-3">
                     <div><label>Ruangan</label><select id="p-ruang" class="p-3 rounded-xl font-bold w-full" required>${tersedia.map(r => `<option value="${r}">${r}</option>`).join('')}</select></div>
                     <div><label>Umur (Thn)</label><input type="number" id="p-umur" class="p-3 rounded-xl font-bold w-full" placeholder="Thn" required></div>
-                    <div><label>Penjamin</label><select id="p-penjamin" class="p-3 rounded-xl font-bold w-full"><option>BPJS</option><option>POLRI</option><option>UMUM</option><option>ASURANSI</option></select></div>
+                    <div><label>Penjamin</label><select id="p-penjamin" class="p-3 rounded-xl font-bold w-full"><option>BPJS</option><option>POLRI</option><option>PNS POLRI</option><option>KELUARGA POLRI</option><option>UMUM</option><option>ASURANSI</option></select></div>
                 </div>
                 <div><label>Alamat Lengkap</label><input type="text" id="p-alamat" class="w-full p-3 rounded-xl font-bold" placeholder="Alamat Pasien" required></div>
                 <div class="grid grid-cols-2 gap-3">
@@ -656,16 +658,56 @@
             </div>`;
             document.getElementById('modal-content').innerHTML = html; openPopup();
         }
+        function openEditPasien(id) {
+    const p = databasePasien.find(item => item.id === id);
+    document.getElementById('popup-title').innerText = p.nama;
+    let html = `<div class="space-y-5">
+        <div class="flex border border-white/10 rounded-2xl overflow-hidden p-1 bg-white/5">
+            <button onclick="toggleVisite(${id}, false)" class="flex-1 py-3 font-bold text-xs rounded-xl ${!p.sudahVisite ? 'bg-red-600 shadow-lg' : 'text-slate-400'}">BELUM VISITE</button>
+            <button onclick="toggleVisite(${id}, true)" class="flex-1 py-3 font-bold text-xs rounded-xl ${p.sudahVisite ? 'bg-green-600 shadow-lg' : 'text-slate-400'}">SUDAH VISITE</button>
+        </div>
+        <div class="grid grid-cols-2 gap-3 bg-white/5 p-4 rounded-2xl border border-white/10">
+            <div><label>No. RM</label><input type="text" id="edit-norm" class="w-full p-2.5 rounded-xl text-xs font-bold" value="${p.noRm || ''}"></div>
+            <div><label>Penjamin</label>
+                <select id="edit-penjamin" class="w-full p-2.5 rounded-xl text-xs font-bold">
+                    <option ${p.penjamin === 'BPJS' ? 'selected' : ''}>BPJS</option>
+                    <option ${p.penjamin === 'POLRI' ? 'selected' : ''}>POLRI</option>
+                    <option ${p.penjamin === 'PNS POLRI' ? 'selected' : ''}>PNS POLRI</option>
+                    <option ${p.penjamin === 'KELUARGA POLRI' ? 'selected' : ''}>KELUARGA POLRI</option>
+                    <option ${p.penjamin === 'UMUM' ? 'selected' : ''}>UMUM</option>
+                    <option ${p.penjamin === 'ASURANSI' ? 'selected' : ''}>ASURANSI</option>
+                </select>
+            </div>
+            <div class="col-span-2"><label>Alamat</label><input type="text" id="edit-alamat" class="w-full p-2.5 rounded-xl text-xs font-bold" value="${p.alamat || ''}"></div>
+            <div class="col-span-2"><label>Diagnosa</label><input type="text" id="edit-diagnosa" class="w-full p-2.5 rounded-xl text-xs font-bold" value="${p.diagnosa}"></div>
+        </div>
+        <div class="bg-white/5 p-4 rounded-2xl border border-white/10">
+            <p class="text-[10px] font-black text-fuchsia-400 mb-2 uppercase tracking-widest">Daily Tasks</p>
+            <div class="flex gap-2 mb-3"><input type="text" id="task-in" class="flex-1 p-2 rounded-xl text-xs bg-black/40" placeholder="Tugas baru..."><button onclick="addTask(${id})" class="px-4 bg-fuchsia-600 rounded-xl font-bold text-xs">+</button></div>
+            <div class="space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar">${(p.tasks || []).map((t, i) => `<div class="flex justify-between items-center bg-black/40 p-2.5 rounded-xl border border-white/5"><div class="flex items-center gap-3"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${id},${i})" class="w-4 h-4 accent-green-500"><span class="text-xs ${t.done?'line-through text-slate-500':'text-slate-200'}">${t.text}</span></div><button onclick="delTask(${id},${i})" class="text-red-500 text-xs">✕</button></div>`).join('')}</div>
+        </div>
+        <div class="bg-white/5 p-4 rounded-2xl"><p class="text-[10px] font-black text-amber-400 mb-1 uppercase tracking-widest">Catatan Medis</p><textarea id="edit-catatan" class="w-full h-16 p-3 rounded-xl text-xs bg-black/40 outline-none border border-white/5 focus:border-amber-500">${p.catatan || ''}</textarea></div>
+        
+        <div class="bg-white/5 p-4 rounded-2xl border border-white/10"><p class="text-[10px] font-black text-indigo-400 mb-2 uppercase tracking-widest">Manajemen DPJP</p><div class="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto bg-black/40 p-2 rounded-xl">${daftarDokter.map(d => `<label class="flex items-center p-2 bg-white/5 rounded-lg cursor-pointer"><input type="checkbox" value="${d}" ${(p.dpjp || []).includes(d) ? 'checked' : ''} class="edit-dpjp-check w-4 h-4 mr-3 accent-indigo-500"><span class="text-[11px] font-bold text-slate-300">${d}</span></label>`).join('')}</div></div>
+        <div class="pt-2 space-y-2">
+            <button onclick="saveEdit(${id})" class="w-full py-3 bg-amber-600 rounded-xl font-bold text-white text-xs shadow-xl hover:bg-amber-500">SIMPAN PERUBAHAN</button>
+            <button onclick="pulangkanPasien(${id})" class="w-full py-3 bg-emerald-600 rounded-xl font-bold text-white text-xs shadow-xl hover:bg-emerald-500 uppercase tracking-wider">● PASIEN PULANG / KELUAR</button>
+            <button onclick="hapusPasien(${id})" class="w-full py-1 text-red-500 text-[10px] font-black uppercase tracking-widest">Hapus Permanen</button>
+        </div>
+    </div>`;
+    document.getElementById('modal-content').innerHTML = html; openPopup();
+}
         function saveEdit(id) { 
-            const updates = {};
-            updates[`pasien/${id}/noRm`] = document.getElementById('edit-norm').value;
-            updates[`pasien/${id}/alamat`] = document.getElementById('edit-alamat').value;
-            updates[`pasien/${id}/diagnosa`] = document.getElementById('edit-diagnosa').value;
-            updates[`pasien/${id}/catatan`] = document.getElementById('edit-catatan').value; 
-            updates[`pasien/${id}/dpjp`] = Array.from(document.querySelectorAll('.edit-dpjp-check:checked')).map(cb => cb.value);
-            window.dbUpdate(window.dbRef(window.db), updates);
-            closePopup(); 
-        }
+    const updates = {};
+    updates[`pasien/${id}/noRm`] = document.getElementById('edit-norm').value;
+    updates[`pasien/${id}/penjamin`] = document.getElementById('edit-penjamin').value; // Menambahkan update penjamin
+    updates[`pasien/${id}/alamat`] = document.getElementById('edit-alamat').value;
+    updates[`pasien/${id}/diagnosa`] = document.getElementById('edit-diagnosa').value;
+    updates[`pasien/${id}/catatan`] = document.getElementById('edit-catatan').value; 
+    updates[`pasien/${id}/dpjp`] = Array.from(document.querySelectorAll('.edit-dpjp-check:checked')).map(cb => cb.value);
+    window.dbUpdate(window.dbRef(window.db), updates);
+    closePopup(); 
+}
         function pulangkanPasien(id) {
             const p = databasePasien.find(item => item.id === id);
             if (!p) return;
